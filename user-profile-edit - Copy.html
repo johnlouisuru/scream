@@ -1,0 +1,1107 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teach Me How To Scream</title>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background-color: #000000;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @font-face {
+            font-family: 'Deathcore';
+            src: url('fonts/Faceless.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Crunk';
+            src: url('fonts/TheDark.ttf') format('truetype');
+        }
+
+        #nav-bar {
+            width: 100%;
+            height: 50px;
+            background-color: #131313;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-bottom: solid 1px #ff0000;
+        }
+
+        #banner {
+            color: #ffffff;
+            font-size: 28px;
+            font-family: Crunk;
+            text-align: center;
+        }
+
+        #paypal-button {
+            position: absolute;
+            right: 10px;
+            width: 98px;
+            height: 55px;
+        }
+
+        #profile-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            height: calc(100vh - 500px);
+            padding: 20px;
+        }
+
+        #profile-picture {
+            width: 350px;
+            height: 100%;
+            max-height: 300px;
+            border: 1px solid #ffffff;
+        }
+		#profile-picture:hover {
+			filter: grayscale(100%);
+			transform: scale(1.05);
+			transition: filter 0.3s ease, transform 0.3s ease;
+		}
+
+        #bio {
+            width: 900px; /* Width set to 900px */
+            height: 300px; /* Reduced height to 300px */
+            background-color: #131313;
+            padding: 20px;
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 20px;
+            border-radius: 15px;
+        }
+		
+
+
+        #name-info {
+            font-size: 32px; /* Increased font size by 2px */
+            font-family: Deathcore;
+        }
+
+        #band-info {
+            font-size: 22px; /* Increased font size by 2px */
+            font-family: Arial;
+        }
+
+        #bio-info {
+            font-size: 20px; /* Increased font size by 2px */
+            color: #dcdcdc;
+            line-height: 1.5;
+            font-family: Arial;
+        }
+		#bio-info:hover {
+		
+			background-color: #5f5f5f;
+		
+		}
+        #ad-1 {
+            width: 300px;
+            height: 357px;
+        }
+
+        #tabs-container {
+            width: 100%;
+            height: 450px;
+            background-color: #131313;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #tab-buttons {
+            display: flex;
+            justify-content: space-around;
+            background-color: #ff0000;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            background-color: #cc0000;
+        }
+
+        .tab-content {
+            flex-grow: 1;
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Tutorials Section */
+        .video-thumbnail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 200px;
+            margin: 26px;
+            padding: 5px;
+            text-align: center;
+			float: left;
+			
+        }
+		
+		 .video-youtube {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 225px;
+			height: 180px;
+            margin: 5px;
+            border: 1px solid #ffffff;
+            padding: 5px;
+            text-align: center;
+			float: left;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+        }
+
+        .video-title {
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        /* Questions Section */
+        .conversation-container {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 15px;
+			scrollbar-width: auto;
+			scrollbar-width: thin;
+			scrollbar-width: none;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            word-wrap: break-word;
+        }
+
+        .artist-message {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .profile-picture-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            margin: 5px;
+            overflow: hidden;
+        }
+
+        .profile-picture-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message-bubble {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 15px;
+			margin-bottom: 8px;
+            max-width: 90%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .artist-name, .user-name {
+            font-size: 12px;
+            margin: 0 5px;
+            color: #aaa;
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: #777;
+        }
+
+        /* Adjusted margin-bottom for Questions header */
+        #questions h2 {
+            margin-bottom: 10px; /* Increased by an additional 5px */
+        }
+
+        /* Social Media Thumbnails */
+        .social-thumbnails {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .social-thumbnails img {
+            width: 180px; /* Increased image size */
+            height: 180px;
+            
+        }
+
+        /* Prompt Section */
+        #prompt-container {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            padding: 10px;
+            border-top: 1px solid #555;
+            gap: 10px;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: #222;
+            border: none;
+            color: #fff;
+            border-radius: 15px;
+        }
+
+        #send-button {
+            background-color: #ff0000;
+            border: none;
+            padding: 10px 15px;
+            color: #ffffff;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #cc0000;
+        }
+		
+       #profile-picture {
+            width: 350px;
+            height: 300px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Hidden file input */
+        #fileInput {
+            display: none;
+        }
+
+        /* Modal for cropping */
+        #cropper-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        #cropper-modal img {
+            max-width: 100%;
+            max-height: 60vh;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .buttons button {
+            padding: 10px;
+            border: none;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+		
+		/* update bio */
+		
+		textarea#bio-form {
+			font-size: 20px;
+			font-family: Arial;
+			color: #ffffff;
+			background-color: #131313;
+			height: 150px;
+			width: 860px;
+			border: none;
+			resize: none;
+			z-index: 10;
+			position: relative;
+			display: block;
+			box-sizing: border-box;
+			pointer-events: auto;
+		}
+		
+		#save-discard-container {
+		
+			position: absolute;
+			z-index: 2;
+			left: 370px;
+			width: 250px;
+			height: 50px;
+			margin-left: 800px;
+			box-shadow: none; 
+			outline: none;			
+		
+		}
+		
+		.save-discard-buttons {
+			margin-left: 5px;
+			border-radius: 15px;
+			height: 45px;
+			width: 107px;
+			background-color: #F24E00;
+			border: none;
+		}
+		.save-discard-buttons:hover {background-color: #F26B00;}
+		
+		.popup {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+			z-index: 1000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.popup-content {
+			background: white;
+			padding: 20px;
+			border-radius: 8px;
+			text-align: center;
+			width: 300px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+		}
+
+		.popup-buttons {
+			margin-top: 20px;
+		}
+
+		.popup-buttons button {
+			margin: 5px;
+			padding: 10px 20px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+		/* Modal Styling */
+		.modal {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.8);
+			z-index: 1000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.modal-content {
+			background-color: white;
+			padding: 20px;
+			border-radius: 10px;
+			text-align: center;
+			width: 300px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+		}
+
+		.modal-content h3 {
+			margin-bottom: 20px;
+			color: black;
+		}
+
+		.modal-content label {
+			display: block;
+			margin-bottom: 10px;
+			color: black;
+		}
+
+		.modal-content input {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 20px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+
+		.modal-buttons {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.modal-buttons button {
+			padding: 10px 20px;
+			font-size: 14px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		#add-video-button {
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		#cancel-button {
+			background-color: #F44336;
+			color: white;
+		}
+
+		#add-video-button:hover {
+			background-color: #45a049;
+		}
+
+		#cancel-button:hover {
+			background-color: #e53935;
+		}
+		
+		.video-thumbnail a {
+			text-decoration: none; /* Removes underline */
+			color: inherit;
+			display: block; /* Makes the anchor span the entire thumbnail */
+		}
+
+		.video-thumbnail img {
+		
+			cursor: pointer; /* Ensures the cursor changes to a pointer on hover */
+			transition: transform 0.2s ease;
+		}
+		
+		/* Social page */
+		
+		/* Modal Styling */
+		.social-modal {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.7); /* Dim background */
+			z-index: 1000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.social-modal-content {
+			background: white;
+			padding: 20px;
+			border-radius: 10px;
+			text-align: center;
+			width: 300px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+		}
+
+		.social-modal-content h3 {
+			margin-bottom: 15px;
+			font-size: 18px;
+			color: black;
+		}
+
+		.social-modal-content label {
+			display: block;
+			margin-bottom: 10px;
+			color: black;
+			font-size: 14px;
+		}
+
+		.social-modal-content input {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 20px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+
+		.social-modal-buttons {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.social-modal-buttons button {
+			padding: 10px 15px;
+			font-size: 14px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			width: 45%; /* Ensure buttons are equal width */
+		}
+
+		.social-modal-buttons #save-social-link-button {
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		.social-modal-buttons #cancel-social-link-button {
+			background-color: #F44336;
+			color: white;
+		}
+
+		.social-modal-buttons button:hover {
+			opacity: 0.9;
+		}
+		
+
+		#prompt-container {
+			position: fixed; /* Ensure it stays at the bottom */
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			background-color: #333;
+			padding: 10px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			z-index: 100; /* Keeps it above other content */
+		}
+
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: #222;
+            border: none;
+            color: #fff;
+            border-radius: 15px;
+        }
+
+        #send-button {
+            background-color: #ff0000;
+            border: none;
+            padding: 10px 15px;
+            color: #ffffff;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #cc0000;
+        }
+		
+		#message-pane {
+		
+			height: 275px;
+			overflow-y: scroll;
+		
+		}
+		
+
+
+
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <div id="nav-bar">
+        <div id="banner">Teach Me How To Scream AI</div>
+        <img id="paypal-button" src="gfx/paypal.png" alt="PayPal Button">
+    </div>
+
+    <!-- Profile Section -->
+    <div id="profile-section">
+		<a href="#" id="profile-picture-anchor">
+        <img id="profile-picture" src="profile_pics/CJ_McCreery.jpg" alt="Profile Picture">
+        </a>
+    <!-- Overlay for the popup window -->
+    <!-- Hidden File Input for Image Upload -->
+    <input type="file" id="fileInput" accept="image/*">
+
+    <!-- Modal for Image Cropping -->
+    <div id="cropper-modal">
+        <img id="image-to-crop" src="" alt="Image to crop">
+        <div class="buttons">
+            <button id="save-cropped-image">Save</button>
+            <button id="discard-cropped-image">Discard</button>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+        <div id="bio">
+            <div id="name-info">Alex Terrible</div><div id='save-discard-container'></div>
+            <a><div id="band-info">Bands: Slaughter to Prevail</div></a>
+			<a href="#" id='profile-change' style="text-decoration: none;" onclick="javascript: updateBio(0);">
+            <div id="bio-info">Alex Terrible is known for his powerful and intense vocal techniques, pioneering extreme vocal styles in metal music. With a deep passion for metal, he has pushed the boundaries of vocal performance, incorporating various screaming and growling techniques that captivate audiences worldwide. This is placeholder text describing his background, achievements, and influence on the genre.</div>
+			</a>
+        </div>
+        
+        <div id="ad-1">
+            <img style="width: 100%; height: 100%;" src="gfx/ad.png" alt="Advertisement">
+        </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div id="tabs-container">
+        <!-- Tab Buttons -->
+        <div id="tab-buttons">
+            <div class="tab-button" onclick="showTab('tutorials')">Tutorials</div>
+            <div class="tab-button" onclick="showTab('questions')">Questions</div>
+            <div class="tab-button" onclick="showTab('social')">Social</div>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tutorials" class="tab-content">
+            <h2>Tutorials</h2>
+             <a class="video-thumbnail" id="add-video">
+				<img src="gfx/add-button.png" alt="Add New Video">
+			</a>
+			 <div class="video-thumbnail">
+				<iframe class="video-youtube" src="https://www.youtube.com/embed/ZHyL1LqNKuk?si=4gHiBx00YF0vWMmV" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <div class="video-title">How to Scream Like a Pro</div>
+            </div>
+			
+        </div>
+        
+		<!-- Modal for Adding Video -->
+	<div id="popup-modal" class="modal">
+		<div class="modal-content">
+			<h3>Add or Edit Video</h3>
+			<label for="youtube-url">YouTube URL:</label>
+			<input type="text" id="youtube-url" placeholder="Enter YouTube link here...">
+			<label for="video-title">Video Title:</label>
+			<input type="text" id="video-title" placeholder="Enter video title here...">
+			<div class="modal-buttons">
+				<button id="save-button" onclick="saveLink()">Save</button>
+				<button id="cancel-button" onclick="closePopup()">Cancel</button>
+			</div>
+		</div>
+	</div>
+        <div id="questions" class="tab-content">
+            <h2>Questions</h2>
+            <div class="conversation-container" id="conversation-container">
+				<div id='message-pane'>
+                <div class="message artist-message">
+                    <div class="profile-picture-circle">
+                        <img src="profile_pics/CJ_McCreery.jpg" alt="Artist Profile">
+                    </div>
+                    <div>
+                        <div class="artist-name">Alex Terrible <span class="timestamp">10:15 AM</span></div>
+                        <div class="message-bubble">What techniques do you use for distortion?</div>
+                    </div>
+                </div>
+				
+					<div class="message user-message">
+						<div>
+							<div class="user-name">XGuest_UserX <span class="timestamp">10:16 AM</span></div>
+							<div class="message-bubble">I mostly practice false chord exercises. Any tips?</div>
+						</div>
+						<div class="profile-picture-circle">
+							<img src="gfx/user_profile.png" alt="User Profile">
+						</div>
+					</div>
+                </div>
+				<!-- Prompt Section -->
+            </div>
+			<div id="prompt-container" style="display: none;">
+					<input id="message-input" type="text" placeholder="Type a message..." />
+					<button id="send-button">Send</button>
+				</div>
+        </div>
+
+        <div id="social" class="tab-content">
+            <h2>Social</h2>
+			<div class="social-thumbnails">
+				<a href="https://www.facebook.com/" target="_blank"><img src="gfx/facebook.png" alt="Facebook"></a>
+				<a href="https://www.instagram.com/" target="_blank"><img src="gfx/instagram.png" alt="Instagram"></a>
+				<a href="https://www.twitter.com/" target="_blank"><img src="gfx/x.png" alt="X"></a>
+				<a href="https://www.youtube.com/" target="_blank"><img src="gfx/youtube.png" alt="YouTube"></a>
+				<a href="https://www.soundcloud.com/" target="_blank"><img src="gfx/soundcloud.png" alt="SoundCloud"></a>
+				<a href="https://www.spotify.com/" target="_blank"><img src="gfx/spotify.png" alt="Spotify"></a>
+			</div>
+
+			<!-- Modal for Editing Social Media Links -->
+			<div id="social-link-modal" class="social-modal">
+				<div class="social-modal-content">
+					<h3>Edit Social Media Link</h3>
+					<label for="social-link-input">Social Media URL:</label>
+					<input type="text" id="social-link-input" placeholder="Enter new social media link">
+					<div class="social-modal-buttons">
+						<button id="save-social-link-button" onclick="saveSocialLinkUpdate()">Save</button>
+						<button id="cancel-social-link-button" onclick="closeSocialLinkModal()">Cancel</button>
+					</div>
+				</div>
+			</div>
+
+        <!-- Prompt Section -->
+        <div id="prompt-container" style="display: none;">
+            <input id="message-input" type="text" placeholder="Type a message..." />
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+	
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script>
+	
+		// Function to send a chat message
+
+
+	// Add event listeners
+
+	
+		let currentSocialLink = null; // Track the selected social media link
+
+		// Open the social link modal
+		function openSocialLinkModal(anchorElement) {
+			currentSocialLink = anchorElement; // Save the clicked anchor element
+			const socialLinkModal = document.getElementById('social-link-modal');
+			const socialLinkInputField = document.getElementById('social-link-input');
+
+			// Pre-fill the input field with the current link
+			socialLinkInputField.value = anchorElement.href;
+
+			// Show the modal
+			socialLinkModal.style.display = 'flex';
+		}
+
+		// Close the social link modal
+		function closeSocialLinkModal() {
+			const socialLinkModal = document.getElementById('social-link-modal');
+			socialLinkModal.style.display = 'none';
+		}
+
+		// Save the updated social media link
+		function saveSocialLinkUpdate() {
+			const socialLinkInputField = document.getElementById('social-link-input');
+
+			if (currentSocialLink) {
+				// Update the href attribute of the selected link
+				currentSocialLink.href = socialLinkInputField.value;
+			}
+
+			// Close the modal
+			closeSocialLinkModal();
+		}
+
+		// Attach the openSocialLinkModal function to each social media link
+		document.querySelectorAll('.social-thumbnails a').forEach(anchor => {
+			anchor.addEventListener('click', (event) => {
+				event.preventDefault(); // Prevent the link's default behavior
+				openSocialLinkModal(anchor); // Open the modal
+			});
+		});
+		
+		
+
+	
+		let currentAnchor = null; // To track the link being edited or added
+
+		// Open popup for editing/adding videos
+		function openPopup(anchor) {
+			currentAnchor = anchor; // Save the current anchor element
+			const popup = document.getElementById('popup-modal');
+			const inputUrl = document.getElementById('youtube-url'); // YouTube URL input
+			const inputTitle = document.getElementById('video-title'); // Video title input
+
+			// Pre-fill fields if editing
+			if (anchor && anchor.dataset && anchor.dataset.youtubeId) {
+				inputUrl.value = `https://www.youtube.com/watch?v=${anchor.dataset.youtubeId}`;
+				inputTitle.value = anchor.dataset.videoTitle || ''; // Set existing title or leave blank
+			} else {
+				inputUrl.value = ''; // Clear the input for new additions
+				inputTitle.value = ''; // Clear the title input
+			}
+
+			// Show the popup
+			popup.style.display = 'flex';
+		}
+
+		// Close popup
+		function closePopup() {
+			const popup = document.getElementById('popup-modal');
+			popup.style.display = 'none';
+		}
+
+		// Save or update video
+		function saveLink() {
+			const inputUrl = document.getElementById('youtube-url').value.trim();
+			const inputTitle = document.getElementById('video-title').value.trim();
+
+			// Validate the YouTube URL
+			const videoIdMatch = inputUrl.match(/(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([\w-]+)/) 
+							  || inputUrl.match(/(?:https?:\/\/)?(?:www\.)?youtu\.be\/([\w-]+)/);
+
+			if (!videoIdMatch) {
+				alert('Invalid YouTube URL. Please provide a valid link.');
+				return;
+			}
+
+			const videoId = videoIdMatch[1];
+
+			if (currentAnchor) {
+				// Update existing video if editing
+				currentAnchor.dataset.youtubeId = videoId; // Save video ID in the dataset
+				currentAnchor.dataset.videoTitle = inputTitle; // Save title in the dataset
+				const iframe = currentAnchor.querySelector('iframe');
+				const titleDiv = currentAnchor.querySelector('.video-title');
+
+				if (iframe) iframe.src = `https://www.youtube.com/embed/${videoId}`;
+				if (titleDiv) titleDiv.textContent = inputTitle || 'New Tutorial'; // Default title if empty
+			} else {
+				// Add new video if adding
+				const tutorialsContainer = document.getElementById('tutorials');
+				const newVideoDiv = document.createElement('div');
+				newVideoDiv.style.marginLeft = "25px";
+				newVideoDiv.className = 'video-thumbnail';
+				newVideoDiv.innerHTML = `
+					<iframe class="video-youtube" 
+							src="https://www.youtube.com/embed/${videoId}" 
+							title="YouTube video player" 
+							frameborder="0" 
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+							referrerpolicy="strict-origin-when-cross-origin" 
+							allowfullscreen>
+					</iframe>
+					<div class="video-title">${inputTitle || 'New Tutorial'}</div>
+				`;
+				tutorialsContainer.appendChild(newVideoDiv);
+			}
+
+			// Close the popup
+			closePopup();
+		
+		}
+
+		// Attach click event to the "Add Video" button
+		document.getElementById('add-video').addEventListener('click', (event) => {
+			event.preventDefault();
+			openPopup(null); // Pass null for adding a new video
+		});
+		
+		function moveCursorToEnd() {
+            const textarea = document.getElementById('bio-form');
+            const textLength = textarea.value.length;
+
+            // Set the cursor position to the end of the text
+            textarea.selectionStart = textLength;
+            textarea.selectionEnd = textLength;
+
+            // Focus the textarea to make the cursor visible
+            textarea.focus();
+        }
+		
+		function updateBio(x) {
+			let currentBio = document.getElementById('bio-info');
+			let buttonContainer = document.getElementById('save-discard-container');
+			let profileChange = document.getElementById('profile-change');
+
+			if (x == 0) {
+				// When profile change button is clicked, make bio editable
+				currentBio.innerHTML = '<textarea id="bio-form" maxlength="478" rows="5" cols="40">' + currentBio.innerHTML + '</textarea>';
+				buttonContainer.innerHTML = '<button class="save-discard-buttons" onclick="updateBio(2);">Save</button><button class="save-discard-buttons" onclick="updateBio(3);">Discard</button>';
+				profileChange.onclick = '#'; // Disable further editing until save or discard
+				moveCursorToEnd();
+			}
+
+			if (x == 2) {
+				// Save changes
+				let newBioText = document.getElementById('bio-form').value; // Get updated text
+				currentBio.innerHTML = newBioText; // Replace bio with updated text
+				buttonContainer.innerHTML = ''; // Remove save and discard buttons
+				profileChange.onclick = function() { updateBio(0); }; // Re-enable editing by clicking profile change
+			}
+
+			if (x == 3) {
+				// Discard changes
+				let originalBio = 'Alex Terrible is known for his powerful and intense vocal techniques, pioneering extreme vocal styles in metal music. With a deep passion for metal, he has pushed the boundaries of vocal performance, incorporating various screaming and growling techniques that captivate audiences worldwide. This is placeholder text describing his background, achievements, and influence on the genre.'; // Reset to original bio
+				currentBio.innerHTML = originalBio; // Set the bio back to original text
+				buttonContainer.innerHTML = ''; // Remove save and discard buttons
+				profileChange.onclick = function() { updateBio(0); }; // Re-enable editing by clicking profile change
+			}
+		}
+        // Get Elements
+        const profilePicture = document.getElementById('profile-picture');
+        const fileInput = document.getElementById('fileInput');
+        const overlay = document.getElementById('overlay');
+        const cropperModal = document.getElementById('cropper-modal');
+        const imageToCrop = document.getElementById('image-to-crop');
+        const saveButton = document.getElementById('save-cropped-image');
+        const discardButton = document.getElementById('discard-cropped-image');
+		
+        let cropper;  // Cropper.js instance
+
+        // Open file input when clicking on the profile picture
+        profilePicture.addEventListener('click', function(event) {
+            event.preventDefault();
+            fileInput.click();
+        });
+
+        // Handle file input change event (image selected)
+        fileInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Create an object URL for the selected file
+                const url = URL.createObjectURL(file);
+
+                // Show the modal and image
+                overlay.style.display = 'block';
+                cropperModal.style.display = 'block';
+                imageToCrop.src = url;
+
+                // Initialize Cropper.js once the image is loaded
+                imageToCrop.onload = function() {
+                    if (cropper) {
+                        cropper.destroy();  // Destroy any existing cropper instance
+                    }
+                    cropper = new Cropper(imageToCrop, {
+                        aspectRatio: 350 / 300,  // Maintain the same aspect ratio as the profile picture
+                        viewMode: 1,  // Contain the image in the canvas
+                        minCropBoxWidth: 100,
+                        minCropBoxHeight: 100,
+                        cropBoxResizable: true,
+                        cropBoxMovable: true,
+                    });
+                };
+            }
+        });
+
+        // Save the cropped image and update the profile picture
+        saveButton.addEventListener('click', function() {
+            const croppedCanvas = cropper.getCroppedCanvas();
+            const croppedImageURL = croppedCanvas.toDataURL();
+
+            // Update the profile picture with the cropped image
+            profilePicture.src = croppedImageURL;
+
+            // Close the modal
+            closeModal();
+        });
+
+        // Discard the changes and close the modal
+        discardButton.addEventListener('click', function() {
+            // Close the modal without saving
+            closeModal();
+        });
+
+        // Close the modal and reset the overlay
+        function closeModal() {
+            overlay.style.display = 'none';
+            cropperModal.style.display = 'none';
+            if (cropper) {
+                cropper.destroy();  // Clean up cropper instance
+            }
+        }
+		
+		
+        function showTab(tabId) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            const promptContainer = document.getElementById("prompt-container");
+
+            tabContents.forEach(content => content.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            // Show or hide the prompt based on the active tab
+            if (tabId === "questions") {
+                promptContainer.style.display = "flex";
+            } else {
+                promptContainer.style.display = "none";
+            }
+        }
+
+        function formatTime(hours, minutes) {
+            const period = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12 || 12;
+            return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
+        }
+
+        function sendMessage() {
+            const message = document.getElementById("message-input").value;
+            if (message.trim()) {
+                const container = document.getElementById("message-pane");
+				const proPic = (document.getElementById('profile-picture').src);
+				const now = new Date();
+				const month = now.getMonth() + 1; // Add 1 to make it one-based
+				const day = now.getDate(); // Correct day of the month
+				const year = now.getFullYear(); // Get full year
+				const compDate = month + '/' + day + '/' + year + ' '; // Format as MM/DD/YYYY
+				const hours = now.getHours();
+				const minutes = now.getMinutes();
+				const formattedTime = formatTime(hours, minutes);
+
+				const userMessage = document.createElement("div");
+				const usersName = document.getElementById('name-info').innerHTML;
+
+				userMessage.className = "message user-message";
+				userMessage.innerHTML = `
+					<div>
+						<div class="user-name">${usersName}<span class="timestamp">${compDate}${formattedTime}</span></div>
+						<div class="message-bubble">${message}</div>
+					</div>
+					<div class="profile-picture-circle">
+						<img src="${proPic}" alt="User Profile">
+					</div>
+				`;
+				container.prepend(userMessage);
+                document.getElementById("message-input").value = "";
+            }
+        }
+
+        document.getElementById("send-button").addEventListener("click", sendMessage);
+
+        document.getElementById("message-input").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

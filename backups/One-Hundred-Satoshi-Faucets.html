@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>100 Satoshi Faucets</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow-y: auto;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            text-decoration: underline;
+            margin-top: 20px;
+        }
+
+        .info-bar {
+            background-color: #1f1f1f;
+            border: 1px solid white;
+            border-radius: 15px;
+            margin: 10px auto;
+            padding: 10px;
+            text-align: center;
+            width: 90%;
+            cursor: pointer;
+        }
+
+        .info-bar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .info-bar a:hover {
+            text-decoration: underline;
+        }
+
+        .iframe-container {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .button {
+            background-color: #1f1f1f;
+            color: white;
+            border: 1px solid white;
+            border-radius: 15px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #333;
+        }
+
+        .timer-panel {
+            display: none;
+            position: fixed;
+            top: 10%;
+            left: 50%;
+            transform: translate(-50%, -10%);
+            background-color: #1f1f1f;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 600px;
+            z-index: 1000;
+            color: white;
+            overflow-y: auto;
+            max-height: 80vh;
+        }
+
+        .timer-panel input {
+            width: 70%;
+            padding: 5px;
+            margin: 5px;
+        }
+
+        .timer-panel button {
+            background-color: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+
+        .timer-panel button:hover {
+            background-color: #555;
+        }
+
+        .close-button {
+            text-align: right;
+            cursor: pointer;
+            color: white;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>100 Satoshi Faucets</h1>
+
+    <div class="button-container">
+        <button class="button" onclick="toggleTimerPanel()">Manage Timers</button>
+    </div>
+
+    <div id="timer-panel" class="timer-panel">
+        <div class="close-button" onclick="toggleTimerPanel()">X</div>
+        <h3>Timers</h3>
+        <div id="timer-list"></div>
+        <input type="text" id="timer-name" placeholder="Timer Name">
+        <input type="number" id="timer-duration" placeholder="Duration (seconds)">
+        <button onclick="addTimer()">Add Timer</button>
+        <button onclick="saveTimers()">Save Timers</button>
+        <button onclick="loadTimers()">Load Timers</button>
+    </div>
+
+    <!-- List of Faucets -->
+    <div id="faucet-list">
+        <!-- Sample Entry -->
+        <div class="info-bar" onclick="toggleIframe(this)">
+            <a href="https://cointiply.com" target="_blank">Cointiply</a>
+            <div class="iframe-container">
+                <iframe src="https://cointiply.com"></iframe>
+            </div>
+        </div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://cointiply.com" target="_blank">Cointiply</a>
+			<div class="iframe-container">
+				<iframe src="https://cointiply.com"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://freebitco.in" target="_blank">FreeBitco.in</a>
+			<div class="iframe-container">
+				<iframe src="https://freebitco.in"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://firefaucet.win" target="_blank">Fire Faucet</a>
+			<div class="iframe-container">
+				<iframe src="https://firefaucet.win"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://faucetcrypto.com" target="_blank">Faucet Crypto</a>
+			<div class="iframe-container">
+				<iframe src="https://faucetcrypto.com"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://moonbit.co.in" target="_blank">Moon Bitcoin</a>
+			<div class="iframe-container">
+				<iframe src="https://moonbit.co.in"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://btcclicks.com" target="_blank">BTC Clicks</a>
+			<div class="iframe-container">
+				<iframe src="https://btcclicks.com"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://satoshihero.com" target="_blank">SatoshiHero</a>
+			<div class="iframe-container">
+				<iframe src="https://satoshihero.com"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://allcoins.pw" target="_blank">AllCoins.pw</a>
+			<div class="iframe-container">
+				<iframe src="https://allcoins.pw"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://bonusbitcoin.co" target="_blank">BonusBitcoin</a>
+			<div class="iframe-container">
+				<iframe src="https://bonusbitcoin.co"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+			<a href="https://bitcoinker.com" target="_blank">Bitcoinker</a>
+			<div class="iframe-container">
+				<iframe src="https://bitcoinker.com"></iframe>
+			</div>
+		</div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+    <a href="https://bitfun.co" target="_blank">BitFun</a>
+    <div class="iframe-container">
+        <iframe src="https://bitfun.co"></iframe>
+    </div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://cryptowin.io" target="_blank">CryptoWin</a>
+		<div class="iframe-container">
+			<iframe src="https://cryptowin.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://freebitcoin.io" target="_blank">FreeBitcoin.io</a>
+		<div class="iframe-container">
+			<iframe src="https://freebitcoin.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://satoshilabs.org" target="_blank">SatoshiLabs</a>
+		<div class="iframe-container">
+			<iframe src="https://satoshilabs.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://coinpayu.com" target="_blank">CoinPayU</a>
+		<div class="iframe-container">
+			<iframe src="https://coinpayu.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://adbtc.top" target="_blank">AdBTC</a>
+		<div class="iframe-container">
+			<iframe src="https://adbtc.top"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://btc4ads.com" target="_blank">BTC4ADS</a>
+		<div class="iframe-container">
+			<iframe src="https://btc4ads.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://faucethub.io" target="_blank">FaucetHub</a>
+		<div class="iframe-container">
+			<iframe src="https://faucethub.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bitpick.co" target="_blank">BitPick</a>
+		<div class="iframe-container">
+			<iframe src="https://bitpick.co"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://dailyfreebits.com" target="_blank">DailyFreeBits</a>
+		<div class="iframe-container">
+			<iframe src="https://dailyfreebits.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bitcoinzebra.com" target="_blank">Bitcoin Zebra</a>
+		<div class="iframe-container">
+			<iframe src="https://bitcoinzebra.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://moonlitecoin.com" target="_blank">Moon Litecoin</a>
+		<div class="iframe-container">
+			<iframe src="https://moonlitecoin.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://litecoinfaucet.net" target="_blank">Litecoin Faucet</a>
+		<div class="iframe-container">
+			<iframe src="https://litecoinfaucet.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://ethereum-faucet.org" target="_blank">Ethereum-Faucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://ethereum-faucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://dogecoinfaucet.info" target="_blank">Dogecoin Faucet</a>
+		<div class="iframe-container">
+			<iframe src="https://dogecoinfaucet.info"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://dutchycorp.space" target="_blank">Dutchy CORP</a>
+		<div class="iframe-container">
+			<iframe src="https://dutchycorp.space"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://coinfaucet.io" target="_blank">CoinFaucet.io</a>
+		<div class="iframe-container">
+			<iframe src="https://coinfaucet.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://litecoinads.com" target="_blank">LitecoinAds</a>
+		<div class="iframe-container">
+			<iframe src="https://litecoinads.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://esfaucet.com" target="_blank">ESFaucet</a>
+		<div class="iframe-container">
+			<iframe src="https://esfaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://free-doge.com" target="_blank">Free-Doge</a>
+		<div class="iframe-container">
+			<iframe src="https://free-doge.com"></iframe>
+		</div>
+	</div>
+
+        <!-- Repeat for all 100 faucets -->
+        <!-- Add additional faucets here -->
+    </div>
+		<div class="info-bar" onclick="toggleIframe(this)">
+    <a href="https://claimfreecoins.com" target="_blank">ClaimFreeCoins</a>
+    <div class="iframe-container">
+        <iframe src="https://claimfreecoins.com"></iframe>
+    </div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://coinpot.co" target="_blank">Coinpot.co</a>
+		<div class="iframe-container">
+			<iframe src="https://coinpot.co"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bitcoinsfor.me" target="_blank">Bitcoinsfor.me</a>
+		<div class="iframe-container">
+			<iframe src="https://bitcoinsfor.me"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://cryptomininggame.com" target="_blank">CryptoMiningGame</a>
+		<div class="iframe-container">
+			<iframe src="https://cryptomininggame.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://satoshiquiz.com" target="_blank">SatoshiQuiz</a>
+		<div class="iframe-container">
+			<iframe src="https://satoshiquiz.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bitgames.io" target="_blank">BitGames</a>
+		<div class="iframe-container">
+			<iframe src="https://bitgames.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://freeethereum.com" target="_blank">FreeEthereum.com</a>
+		<div class="iframe-container">
+			<iframe src="https://freeethereum.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://litecoinfaucet.net" target="_blank">LitecoinFaucet.net</a>
+		<div class="iframe-container">
+			<iframe src="https://litecoinfaucet.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://dogefaucet.com" target="_blank">Dogefaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://dogefaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://monerofaucet.info" target="_blank">MoneroFaucet.info</a>
+		<div class="iframe-container">
+			<iframe src="https://monerofaucet.info"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://zcashfaucet.info" target="_blank">ZCashFaucet.info</a>
+		<div class="iframe-container">
+			<iframe src="https://zcashfaucet.info"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://dash-faucet.com" target="_blank">Dash-Faucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://dash-faucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://tronfaucet.info" target="_blank">TronFaucet.info</a>
+		<div class="iframe-container">
+			<iframe src="https://tronfaucet.info"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://iotafaucet.org" target="_blank">IotaFaucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://iotafaucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://neofaucet.net" target="_blank">NeoFaucet.net</a>
+		<div class="iframe-container">
+			<iframe src="https://neofaucet.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://stellarfaucet.org" target="_blank">StellarFaucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://stellarfaucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://cardanofaucet.info" target="_blank">CardanoFaucet.info</a>
+		<div class="iframe-container">
+			<iframe src="https://cardanofaucet.info"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://vechainfaucet.com" target="_blank">VeChainFaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://vechainfaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://eosfaucet.net" target="_blank">EOSFaucet.net</a>
+		<div class="iframe-container">
+			<iframe src="https://eosfaucet.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://tezosfaucet.org" target="_blank">TezosFaucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://tezosfaucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+    <a href="https://chainlinkfaucet.com" target="_blank">ChainlinkFaucet.com</a>
+    <div class="iframe-container">
+        <iframe src="https://chainlinkfaucet.com"></iframe>
+    </div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://polkadotfaucet.net" target="_blank">PolkadotFaucet.net</a>
+		<div class="iframe-container">
+			<iframe src="https://polkadotfaucet.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://binancecoinfaucet.com" target="_blank">BinanceCoinFaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://binancecoinfaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://uniswapfaucet.org" target="_blank">UniswapFaucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://uniswapfaucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://solanafaucet.net" target="_blank">SolanaFaucet.net</a>
+		<div class="iframe-container">
+			<iframe src="https://solanafaucet.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://avalanchefaucet.com" target="_blank">AvalancheFaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://avalanchefaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://shibainufaucet.org" target="_blank">ShibaInuFaucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://shibainufaucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://cryptofaucethub.com" target="_blank">CryptoFaucetHub</a>
+		<div class="iframe-container">
+			<iframe src="https://cryptofaucethub.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://faucetpay.io" target="_blank">FaucetPay.io</a>
+		<div class="iframe-container">
+			<iframe src="https://faucetpay.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://expresscrypto.io" target="_blank">ExpressCrypto.io</a>
+		<div class="iframe-container">
+			<iframe src="https://expresscrypto.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://coinbase.com/earn" target="_blank">Coinbase Earn</a>
+		<div class="iframe-container">
+			<iframe src="https://coinbase.com/earn"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://stormgain.com" target="_blank">StormGain</a>
+		<div class="iframe-container">
+			<iframe src="https://stormgain.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://pipeflare.io" target="_blank">PipeFlare</a>
+		<div class="iframe-container">
+			<iframe src="https://pipeflare.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://globalhive.io" target="_blank">GlobalHive</a>
+		<div class="iframe-container">
+			<iframe src="https://globalhive.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://idle-empire.com" target="_blank">Idle-Empire</a>
+		<div class="iframe-container">
+			<iframe src="https://idle-empire.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://cryptowin.io" target="_blank">CryptoWin.io</a>
+		<div class="iframe-container">
+			<iframe src="https://cryptowin.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bitearn.io" target="_blank">BitEarn.io</a>
+		<div class="iframe-container">
+			<iframe src="https://bitearn.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://coinadster.com" target="_blank">CoinAdster</a>
+		<div class="iframe-container">
+			<iframe src="https://coinadster.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://litecoinads.com" target="_blank">LitecoinAds</a>
+		<div class="iframe-container">
+			<iframe src="https://litecoinads.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://dogecoinads.com" target="_blank">DogecoinAds</a>
+		<div class="iframe-container">
+			<iframe src="https://dogecoinads.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+    <a href="https://ethereumads.com" target="_blank">EthereumAds</a>
+    <div class="iframe-container">
+        <iframe src="https://ethereumads.com"></iframe>
+    </div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bitgames.co" target="_blank">BitGames.co</a>
+		<div class="iframe-container">
+			<iframe src="https://bitgames.co"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bonusbitcoin.co" target="_blank">BonusBitcoin</a>
+		<div class="iframe-container">
+			<iframe src="https://bonusbitcoin.co"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://freeripple.com" target="_blank">FreeRipple.com</a>
+		<div class="iframe-container">
+			<iframe src="https://freeripple.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://freetron.com" target="_blank">FreeTron.com</a>
+		<div class="iframe-container">
+			<iframe src="https://freetron.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://freestellar.com" target="_blank">FreeStellar.com</a>
+		<div class="iframe-container">
+			<iframe src="https://freestellar.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://faucetcrypto.com" target="_blank">FaucetCrypto.com</a>
+		<div class="iframe-container">
+			<iframe src="https://faucetcrypto.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://litecoinfaucet.org" target="_blank">LitecoinFaucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://litecoinfaucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://dashfaucet.com" target="_blank">DashFaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://dashfaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://claimlitecoin.com" target="_blank">ClaimLitecoin.com</a>
+		<div class="iframe-container">
+			<iframe src="https://claimlitecoin.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bithub.pro" target="_blank">BitHub.pro</a>
+		<div class="iframe-container">
+			<iframe src="https://bithub.pro"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://faucetlitecoin.com" target="_blank">FaucetLitecoin.com</a>
+		<div class="iframe-container">
+			<iframe src="https://faucetlitecoin.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://faucettron.com" target="_blank">FaucetTron.com</a>
+		<div class="iframe-container">
+			<iframe src="https://faucettron.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://xrpfaucet.com" target="_blank">XrpFaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://xrpfaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://claimdogecoin.com" target="_blank">ClaimDogecoin.com</a>
+		<div class="iframe-container">
+			<iframe src="https://claimdogecoin.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://tronhub.org" target="_blank">TronHub.org</a>
+		<div class="iframe-container">
+			<iframe src="https://tronhub.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://cryptofreefaucet.com" target="_blank">CryptoFreeFaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://cryptofreefaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://zcashfaucet.org" target="_blank">ZCashFaucet.org</a>
+		<div class="iframe-container">
+			<iframe src="https://zcashfaucet.org"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://satoshiclaim.net" target="_blank">SatoshiClaim.net</a>
+		<div class="iframe-container">
+			<iframe src="https://satoshiclaim.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://cryptospinwheel.com" target="_blank">CryptoSpinWheel.com</a>
+		<div class="iframe-container">
+			<iframe src="https://cryptospinwheel.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bithour.com" target="_blank">BitHour.com</a>
+		<div class="iframe-container">
+			<iframe src="https://bithour.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+    <a href="https://spinsatoshi.com" target="_blank">SpinSatoshi.com</a>
+    <div class="iframe-container">
+        <iframe src="https://spinsatoshi.com"></iframe>
+    </div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://moondash.com" target="_blank">MoonDash.com</a>
+		<div class="iframe-container">
+			<iframe src="https://moondash.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://freecryptoloot.com" target="_blank">FreeCryptoLoot.com</a>
+		<div class="iframe-container">
+			<iframe src="https://freecryptoloot.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://faucethublitecoin.com" target="_blank">FaucetHubLitecoin.com</a>
+		<div class="iframe-container">
+			<iframe src="https://faucethublitecoin.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://earnripple.net" target="_blank">EarnRipple.net</a>
+		<div class="iframe-container">
+			<iframe src="https://earnripple.net"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://moonripple.com" target="_blank">MoonRipple.com</a>
+		<div class="iframe-container">
+			<iframe src="https://moonripple.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://bestlitecoinfaucet.com" target="_blank">BestLitecoinFaucet.com</a>
+		<div class="iframe-container">
+			<iframe src="https://bestlitecoinfaucet.com"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://coinmonster.io" target="_blank">CoinMonster.io</a>
+		<div class="iframe-container">
+			<iframe src="https://coinmonster.io"></iframe>
+		</div>
+	</div>
+	<div class="info-bar" onclick="toggleIframe(this)">
+		<a href="https://satoshimadness.com" target="_blank">SatoshiMadness.com</a>
+		<div class="iframe-container">
+			<iframe src="https://satoshimadness.com"></iframe>
+		</div>
+	</div>
+	</div>
+
+
+
+    <script>
+        // Toggle iframe visibility
+        function toggleIframe(element) {
+            const iframeContainer = element.querySelector('.iframe-container');
+            iframeContainer.style.display = iframeContainer.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Timer management
+        const timers = [];
+        function toggleTimerPanel() {
+            const panel = document.getElementById('timer-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addTimer() {
+            const name = document.getElementById('timer-name').value;
+            const duration = parseInt(document.getElementById('timer-duration').value);
+            if (name && duration) {
+                timers.push({ name, duration });
+                renderTimers();
+            }
+        }
+
+        function renderTimers() {
+            const list = document.getElementById('timer-list');
+            list.innerHTML = '';
+            timers.forEach((timer, index) => {
+                const div = document.createElement('div');
+                div.textContent = `${timer.name} - ${timer.duration} seconds`;
+                list.appendChild(div);
+            });
+        }
+
+        function saveTimers() {
+            const json = JSON.stringify(timers);
+            const blob = new Blob([json], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'timers.json';
+            a.click();
+        }
+
+        function loadTimers() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (event) => {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const loadedTimers = JSON.parse(reader.result);
+                    timers.length = 0; // Clear existing timers
+                    timers.push(...loadedTimers);
+                    renderTimers();
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+    </script>
+
+</body>
+</html>

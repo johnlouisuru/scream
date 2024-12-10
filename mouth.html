@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocal Cord Audio Visualizer</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas {
+            display: block;
+            margin: auto;
+        }
+        #controls {
+            margin: 20px;
+            text-align: center;
+        }
+        input {
+            margin: 10px;
+        }
+		#legend {
+			position: absolute;
+			top: 10px;
+			right: 20px;
+			background-color: #1A1A1A;
+			border-radius: 10px;
+			padding: 10px 15px;
+			color: white;
+			font-family: Arial, sans-serif;
+			font-size: 14px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+			z-index: 1000;
+		}
+
+		#legend h3 {
+			margin: 0 0 10px 0;
+			font-size: 16px;
+			text-align: center;
+			color: #FFFFFF;
+		}
+
+		#legend ul {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		#legend li {
+			display: flex;
+			align-items: center;
+			margin-bottom: 5px;
+		}
+
+		.legend-color {
+			width: 20px;
+			height: 20px;
+			border-radius: 50%;
+			display: inline-block;
+			margin-right: 10px;
+		}
+		#infoDisplay {
+			position: absolute;
+			bottom: 20px;
+			right: 20px;
+			background-color: #1A1A1A;
+			border-radius: 10px;
+			padding: 15px 20px;
+			color: white;
+			font-family: Arial, sans-serif;
+			font-size: 14px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+			z-index: 1000;
+		}
+
+		#infoDisplay h3 {
+			margin: 0 0 10px 0;
+			font-size: 16px;
+			text-align: center;
+			color: #FFFFFF;
+		}
+
+		#infoDisplay ul {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		#infoDisplay li {
+			margin-bottom: 5px;
+		}
+
+		#infoDisplay span {
+			font-weight: bold;
+			color: #F0DB4F;
+		}
+		#dataDisplay {
+			position: absolute;
+			bottom: 20px;
+			left: 20px;
+			background-color: #1A1A1A;
+			border-radius: 10px;
+			padding: 15px 20px;
+			color: white;
+			font-family: Arial, sans-serif;
+			font-size: 14px;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+			z-index: 1000;
+			width: 200px;
+		}
+
+		#dataDisplay h3 {
+			margin: 0 0 10px 0;
+			font-size: 16px;
+			text-align: center;
+			color: #FFFFFF;
+		}
+
+		#dataDisplay ul {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		#dataDisplay li {
+			margin-bottom: 5px;
+		}
+
+		#dataDisplay span {
+			font-weight: bold;
+			color: #F0DB4F;
+		}
+		
+		
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input type="file" id="audioFile" accept="audio/*" />
+        <button id="playButton" disabled>Play</button>
+    </div>
+    <canvas id="vocalVisualizer"></canvas>
+	<div id="legend">
+        <h3>Legend</h3>
+        <ul>
+            <li><span class="legend-color" style="background-color: #2A2A2A;"></span> Mouth</li>
+            <li><span class="legend-color" style="background-color: rgba(255, 255, 0, 0.6);"></span> Airflow</li>
+            <li><span class="legend-color" style="background-color: #5CA0DC;"></span> Larynx</li>
+            <li><span class="legend-color" style="background-color: #FF6B6B;"></span> Vocal Cords</li>
+        </ul>
+    </div>
+	<div id="infoDisplay">
+    <h3>Audio Analysis</h3>
+    <ul>
+        <li>Amplitude: <span id="infoAmplitude">0</span></li>
+        <li>Frequency Data (Avg): <span id="infoFrequency">0</span></li>
+        <li>Playing Time: <span id="infoTime">0:00</span></li>
+    </ul>
+	</div>
+	<div id="dataDisplay">
+    <h3>Audio Analysis</h3>
+    <ul>
+        <li>dB: <span id="dataDb">-00.00</span></li>
+        <li>Fundamental Frequency: <span id="dataFrequency">000.00 Hz</span></li>
+        <li>Harmonics: <span id="dataHarmonics">0.00</span></li>
+        <li>Pitch: <span id="dataPitch">000.00 Hz</span></li>
+        <li>Key: <span id="dataKey">C</span></li>
+        <li>Gain: <span id="dataGain">0.00</span></li>
+        <li>Distortion: <span id="dataDistortion">0.00</span></li>
+    </ul>
+	</div>
+    <script>
+const canvas = document.getElementById("vocalVisualizer");
+const ctx = canvas.getContext("2d");
+const audioFileInput = document.getElementById("audioFile");
+const playButton = document.getElementById("playButton");
+
+// Real-time update elements for right-side analysis
+const infoAmplitude = document.getElementById("infoAmplitude");
+const infoFrequency = document.getElementById("infoFrequency");
+const infoTime = document.getElementById("infoTime");
+
+// Real-time update elements for left-side analysis
+const dataDb = document.getElementById("dataDb");
+const dataFrequency = document.getElementById("dataFrequency");
+const dataHarmonics = document.getElementById("dataHarmonics");
+const dataPitch = document.getElementById("dataPitch");
+const dataKey = document.getElementById("dataKey");
+const dataGain = document.getElementById("dataGain");
+const dataDistortion = document.getElementById("dataDistortion");
+
+canvas.width = window.innerWidth * 0.8;
+canvas.height = window.innerHeight * 0.7;
+
+let audioContext, analyser, frequencyData, audio;
+
+// Adjustments for positioning
+const verticalOffset = 60; // Move everything down by 60px
+const airflowHorizontalOffset = 20; // Move airflow to the right by 20px
+
+// Helper function to calculate average amplitude
+function calculateAverageAmplitude(frequencyData) {
+    return (
+        frequencyData.reduce((sum, value) => sum + value, 0) / frequencyData.length
+    );
+}
+
+// Helper function to find the frequency with the highest amplitude
+function getFundamentalFrequency(frequencyData, sampleRate) {
+    let maxIndex = 0;
+    let maxValue = 0;
+
+    for (let i = 0; i < frequencyData.length; i++) {
+        if (frequencyData[i] > maxValue) {
+            maxValue = frequencyData[i];
+            maxIndex = i;
+        }
+    }
+
+    const nyquist = sampleRate / 2;
+    return (maxIndex / frequencyData.length) * nyquist;
+}
+
+// Helper function to map frequencies to musical keys
+function getKey(frequency) {
+    if (frequency === 0) return "N/A";
+    const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const a440 = 440; // Reference pitch (A4)
+    const noteIndex = Math.round(12 * Math.log2(frequency / a440)) + 69;
+    const octave = Math.floor(noteIndex / 12) - 1;
+    const note = notes[(noteIndex + 12) % 12];
+    return `${note}${octave}`;
+}
+
+// Format time in mm:ss
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+    return `${minutes}:${secs}`;
+}
+
+// Handle file input
+audioFileInput.addEventListener("change", () => {
+    const file = audioFileInput.files[0];
+    if (file) {
+        const fileURL = URL.createObjectURL(file);
+        audio = new Audio(fileURL);
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        analyser.fftSize = 2048;
+
+        frequencyData = new Uint8Array(analyser.frequencyBinCount);
+        const source = audioContext.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        playButton.disabled = false;
+    }
+});
+
+// Handle play/pause
+playButton.addEventListener("click", () => {
+    if (audio.paused) {
+        audio.play();
+        playButton.textContent = "Pause";
+        animate();
+    } else {
+        audio.pause();
+        playButton.textContent = "Play";
+    }
+});
+
+// Animation loop with real-time updates
+function animate() {
+    if (audio.paused) return;
+
+    analyser.getByteFrequencyData(frequencyData);
+
+    // Calculate average amplitude and max frequency
+    const amplitude = calculateAverageAmplitude(frequencyData);
+    const sampleRate = audioContext.sampleRate;
+    const fundamentalFrequency = getFundamentalFrequency(frequencyData, sampleRate);
+
+    // Update real-time right-side analysis
+    infoAmplitude.textContent = amplitude.toFixed(2);
+    infoFrequency.textContent = (amplitude / 255).toFixed(2); // Example frequency data
+    infoTime.textContent = formatTime(audio.currentTime);
+
+    // Update real-time left-side analysis
+    const gain = Math.max(...frequencyData) / 255;
+    const distortion = Math.abs(gain - 0.5); // Example distortion calculation
+    dataDb.textContent = (20 * Math.log10(gain || 0.0001)).toFixed(2); // Decibels
+    dataFrequency.textContent = fundamentalFrequency.toFixed(2) + " Hz";
+    dataHarmonics.textContent = (amplitude / 10).toFixed(2);
+    dataPitch.textContent = fundamentalFrequency.toFixed(2) + " Hz";
+    dataKey.textContent = getKey(fundamentalFrequency);
+    dataGain.textContent = gain.toFixed(2);
+    dataDistortion.textContent = distortion.toFixed(2);
+
+    // Clear canvas and draw components
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawMouth(gain * 255); // Scale amplitude to match visuals
+    drawAirflow(gain * 255);
+    drawLarynx(gain * 255);
+    drawVocalCords(gain * 255);
+
+    requestAnimationFrame(animate);
+}
+
+// Draw mouth (topmost)
+function drawMouth(amplitude) {
+    const centerX = canvas.width / 2;
+    const centerY = 100 + verticalOffset; // Adjusted with offset
+
+    // Map amplitude to mouth opening size
+    const mouthOpen = Math.min(50 + amplitude / 4, 150); // Limit the max opening size
+
+    // Outer mouth (static)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, 100, 0, Math.PI * 2); // Larger circle
+    ctx.fillStyle = "#2A2A2A"; // Dark gray for the mouth outline
+    ctx.fill();
+
+    // Inner mouth (dynamic opening)
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, mouthOpen / 2, 0, Math.PI * 2); // Dynamic inner circle
+    ctx.fillStyle = "#000000"; // Black for the mouth interior
+    ctx.fill();
+}
+
+// Draw airflow (next to the mouth, simulating exhalation)
+function drawAirflow(amplitude) {
+    const centerX = canvas.width / 2 + 120 + airflowHorizontalOffset; // Positioned slightly to the right of the mouth
+    const startY = 100 + verticalOffset; // Adjusted with offset
+
+    ctx.beginPath();
+    ctx.moveTo(centerX, startY);
+    ctx.bezierCurveTo(
+        centerX + Math.sin(amplitude / 60) * 50,
+        startY + 100,
+        centerX - Math.sin(amplitude / 60) * 50,
+        startY + 200,
+        centerX,
+        startY + 300
+    );
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "rgba(255, 255, 0, 0.6)"; // Semi-transparent yellow for airflow
+    ctx.stroke();
+}
+
+// Draw larynx (below the mouth)
+function drawLarynx(amplitude) {
+    const centerX = canvas.width / 2;
+    const centerY = 300 + verticalOffset; // Adjusted with offset
+
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, 40, 60 + amplitude / 15, 0, 0, Math.PI * 2);
+    ctx.fillStyle = "#5CA0DC"; // Light blue larynx
+    ctx.fill();
+}
+
+// Draw vocal cords (bottommost)
+function drawVocalCords(amplitude) {
+    const centerX = canvas.width / 2;
+    const centerY = 450 + verticalOffset; // Adjusted with offset
+
+    // Left vocal cord
+    ctx.beginPath();
+    ctx.moveTo(centerX - 30, centerY);
+    ctx.quadraticCurveTo(
+        centerX - 50, centerY + amplitude / 4,
+        centerX - 30, centerY + 20
+    );
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "#FF6B6B"; // Vibrating red
+    ctx.stroke();
+
+    // Right vocal cord
+    ctx.beginPath();
+    ctx.moveTo(centerX + 30, centerY);
+    ctx.quadraticCurveTo(
+        centerX + 50, centerY + amplitude / 4,
+        centerX + 30, centerY + 20
+    );
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "#FF6B6B"; // Vibrating red
+    ctx.stroke();
+}
+
+
+
+
+
+
+
+
+	</script>
+</body>
+</html>

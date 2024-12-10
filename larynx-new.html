@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Larynx</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background-color: #1f1f1f;
+            border: 2px solid #ff0000;
+            border-radius: 15px;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+        }
+        .controls input {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="larynxCanvas" width="800" height="800"></canvas>
+    <div class="controls">
+        <label for="audioInput">Upload Singing Audio File:</label>
+        <input type="file" id="audioInput" accept="audio/*">
+    </div>
+
+    <script>
+        const canvas = document.getElementById("larynxCanvas");
+        const ctx = canvas.getContext("2d");
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const audioInput = document.getElementById("audioInput");
+
+        let audioContext, analyzer, source, audioBuffer;
+        let frequencyData;
+
+        function drawLarynx() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            const centerX = canvasWidth / 2;
+            const centerY = canvasHeight / 2;
+
+            // Background (Blue Layer)
+            ctx.fillStyle = "rgba(0, 0, 255, 0.2)";
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 300, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Laryngeal Wall (Tan with Shading)
+            const gradient = ctx.createRadialGradient(centerX - 50, centerY - 50, 50, centerX, centerY, 300);
+            gradient.addColorStop(0, "#f9d7b9"); // Light tan
+            gradient.addColorStop(1, "#d6a885"); // Dark tan (shadow)
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 300, 0, Math.PI * 2);
+            ctx.fill();
+
+            // False Vocal Folds
+            const falseFoldHeight = 60;
+            ctx.fillStyle = "rgba(180, 80, 80, 1)";
+            ctx.beginPath();
+            ctx.moveTo(centerX - 220, centerY - falseFoldHeight);
+            ctx.quadraticCurveTo(centerX, centerY - 130, centerX + 220, centerY - falseFoldHeight);
+            ctx.lineTo(centerX + 220, centerY - falseFoldHeight + 20);
+            ctx.quadraticCurveTo(centerX, centerY - 110, centerX - 220, centerY - falseFoldHeight + 20);
+            ctx.closePath();
+            ctx.fill();
+
+            // True Vocal Folds (Pink)
+            ctx.strokeStyle = "rgba(255, 105, 180, 1)";
+            ctx.lineWidth = 15;
+
+            const foldStartY = centerY - falseFoldHeight;
+            const foldEndY = centerY + 150;
+
+            // Left Fold
+            ctx.beginPath();
+            ctx.moveTo(centerX - 60, foldStartY);
+            ctx.quadraticCurveTo(
+                centerX - 80 - (Math.max(...frequencyData) / 255 || 0.1) * 40,
+                centerY,
+                centerX - 60,
+                foldEndY
+            );
+            ctx.stroke();
+
+            // Right Fold
+            ctx.beginPath();
+            ctx.moveTo(centerX + 60, foldStartY);
+            ctx.quadraticCurveTo(
+                centerX + 80 + (Math.max(...frequencyData) / 255 || 0.1) * 40,
+                centerY,
+                centerX + 60,
+                foldEndY
+            );
+            ctx.stroke();
+
+            // Shading Between Folds
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+            ctx.beginPath();
+            ctx.moveTo(centerX - 60, foldStartY);
+            ctx.lineTo(centerX + 60, foldStartY);
+            ctx.lineTo(centerX, centerY + 150);
+            ctx.closePath();
+            ctx.fill();
+
+            // Dynamic Black Circle (Contracts with Amplitude)
+            const maxCircleRadius = 50;
+            const minCircleRadius = 10;
+            const circleRadius = maxCircleRadius - (maxCircleRadius - minCircleRadius) * (Math.max(...frequencyData) / 255 || 0.1);
+
+            ctx.fillStyle = "#000000";
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        function animateLarynx() {
+            if (frequencyData) {
+                analyzer.getByteFrequencyData(frequencyData);
+                drawLarynx();
+            }
+            requestAnimationFrame(animateLarynx);
+        }
+
+        audioInput.addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+            const fileReader = new FileReader();
+            fileReader.onload = async (e) => {
+                audioBuffer = await audioContext.decodeAudioData(e.target.result);
+
+                if (source) source.disconnect();
+
+                source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+
+                analyzer = audioContext.createAnalyser();
+                analyzer.fftSize = 256;
+                frequencyData = new Uint8Array(analyzer.frequencyBinCount);
+
+                source.connect(analyzer);
+                analyzer.connect(audioContext.destination);
+
+                source.start();
+                animateLarynx();
+            };
+
+            fileReader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>

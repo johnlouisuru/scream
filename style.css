@@ -1,0 +1,645 @@
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background-color: #000000;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        @font-face {
+            font-family: 'Deathcore';
+            src: url('fonts/Faceless.ttf') format('truetype');
+        }
+
+        @font-face {
+            font-family: 'Crunk';
+            src: url('fonts/TheDark.ttf') format('truetype');
+        }
+
+        #nav-bar {
+            width: 100%;
+            height: 50px;
+            background-color: #131313;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border-bottom: solid 1px #ff0000;
+        }
+
+        #banner {
+            color: #ffffff;
+            font-size: 28px;
+            font-family: Crunk;
+            text-align: center;
+        }
+
+        #paypal-button {
+            position: absolute;
+            right: 10px;
+            width: 98px;
+            height: 55px;
+        }
+
+        #profile-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            height: calc(100vh - 500px);
+            padding: 20px;
+        }
+
+        #profile-picture {
+            width: 350px;
+            height: 100%;
+            max-height: 300px;
+            /*border: 1px solid #ffffff;*/
+        }
+		#profile-picture:hover {
+			filter: grayscale(100%);
+			transform: scale(1.05);
+			transition: filter 0.3s ease, transform 0.3s ease;
+		}
+
+        #bio {
+            width: auto; /* Width set to 900px */
+            height: 300px; /* Reduced height to 300px */
+            background-color: #131313;
+            padding: 20px;
+            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 20px;
+            border-radius: 15px;
+            overflow:hidden;
+        }
+		
+
+
+        #name-info {
+            font-size: 32px; /* Increased font size by 2px */
+            font-family: Deathcore;
+        }
+
+        #band-info {
+            font-size: 22px; /* Increased font size by 2px */
+            font-family: Arial;
+        }
+
+        #bio-info {
+            font-size: 20px; /* Increased font size by 2px */
+            color: #dcdcdc;
+            line-height: 1.5;
+            font-family: Arial;
+        }
+		#bio-info:hover {
+		
+			background-color: #5f5f5f;
+		
+		}
+        #ad-1 {
+            width: 300px;
+            height: 357px;
+        }
+
+        #tabs-container {
+            width: 100%;
+            height: 450px;
+            background-color: #131313;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #tab-buttons {
+            display: flex;
+            justify-content: space-around;
+            background-color: #ff0000;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .tab-button {
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .tab-button:hover {
+            background-color: #cc0000;
+        }
+
+        .tab-content {
+            flex-grow: 1;
+            display: none;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Tutorials Section */
+        .video-thumbnail {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 200px;
+            margin: 26px;
+            padding: 5px;
+            text-align: center;
+			float: left;
+			
+        }
+		
+		 .video-youtube {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 225px;
+			height: 180px;
+            margin: 5px;
+            border: 1px solid #ffffff;
+            padding: 5px;
+            text-align: center;
+			float: left;
+        }
+
+        .video-thumbnail img {
+            width: 100%;
+        }
+
+        .video-title {
+            margin-top: 5px;
+            font-size: 16px;
+        }
+
+        /* Questions Section */
+        .conversation-container {
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 1px;
+			scrollbar-width: auto;
+			scrollbar-width: thin;
+			scrollbar-width: none;
+            overflow-y: scroll;
+            margin-bottom: 5%;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            word-wrap: break-word;
+        }
+
+        .artist-message {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .user-message {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+        .profile-picture-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            margin: 5px;
+            overflow: hidden;
+        }
+
+        .profile-picture-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .message-bubble {
+            background-color: #2a2a2a;
+            padding: 10px;
+            border-radius: 15px;
+			margin-bottom: 8px;
+            max-width: 90%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            line-height: 1.5;
+        }
+
+        .artist-name, .user-name {
+            font-size: 12px;
+            margin: 0 5px;
+            color: #aaa;
+        }
+
+        .timestamp {
+            font-size: 10px;
+            color: #777;
+        }
+
+        /* Adjusted margin-bottom for Questions header */
+        #questions h2 {
+            margin-bottom: 10px; /* Increased by an additional 5px */
+        }
+
+        /* Social Media Thumbnails */
+        .social-thumbnails {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .social-thumbnails img {
+            width: 180px; /* Increased image size */
+            height: 180px;
+            
+        }
+
+        /* Prompt Section */
+        #prompt-container {
+            display: flex;
+            align-items: center;
+            background-color: #333;
+            padding: 10px;
+            border-top: 1px solid #555;
+            gap: 10px;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: #222;
+            border: none;
+            color: #fff;
+            border-radius: 15px;
+        }
+
+        #send-button {
+            background-color: #ff0000;
+            border: none;
+            padding: 10px 15px;
+            color: #ffffff;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #cc0000;
+        }
+		
+       #profile-picture {
+            width: 350px;
+            height: 300px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+
+        /* Hidden file input */
+        #fileInput {
+            display: none;
+        }
+
+        /* Modal for cropping */
+        #cropper-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+        }
+
+        #cropper-modal img {
+            max-width: 100%;
+            max-height: 60vh;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .buttons button {
+            padding: 10px;
+            border: none;
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+		
+		/* update bio */
+		
+		textarea#bio-form {
+			font-size: 20px;
+			font-family: Arial;
+			color: #ffffff;
+			background-color: #131313;
+			height: 150px;
+			width: 860px;
+			border: none;
+			resize: none;
+			z-index: 10;
+			position: relative;
+			display: block;
+			box-sizing: border-box;
+			pointer-events: auto;
+		}
+		
+		#save-discard-container {
+		
+			position: absolute;
+			z-index: 2;
+			left: 370px;
+			width: 250px;
+			height: 50px;
+			margin-left: 800px;
+			box-shadow: none; 
+			outline: none;			
+		
+		}
+		
+		.save-discard-buttons {
+			margin-left: 5px;
+			border-radius: 15px;
+			height: 45px;
+			width: 107px;
+			background-color: #F24E00;
+			border: none;
+		}
+		.save-discard-buttons:hover {background-color: #F26B00;}
+		
+		.popup {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.5);
+			z-index: 1000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.popup-content {
+			background: white;
+			padding: 20px;
+			border-radius: 8px;
+			text-align: center;
+			width: 300px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+		}
+
+		.popup-buttons {
+			margin-top: 20px;
+		}
+
+		.popup-buttons button {
+			margin: 5px;
+			padding: 10px 20px;
+			font-size: 16px;
+			cursor: pointer;
+		}
+		/* Modal Styling */
+		.modal {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.8);
+			z-index: 1000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.modal-content {
+			background-color: white;
+			padding: 20px;
+			border-radius: 10px;
+			text-align: center;
+			width: 300px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+		}
+
+		.modal-content h3 {
+			margin-bottom: 20px;
+			color: black;
+		}
+
+		.modal-content label {
+			display: block;
+			margin-bottom: 10px;
+			color: black;
+		}
+
+		.modal-content input {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 20px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+
+		.modal-buttons {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.modal-buttons button {
+			padding: 10px 20px;
+			font-size: 14px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+
+		#add-video-button {
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		#cancel-button {
+			background-color: #F44336;
+			color: white;
+		}
+
+		#add-video-button:hover {
+			background-color: #45a049;
+		}
+
+		#cancel-button:hover {
+			background-color: #e53935;
+		}
+		
+		.video-thumbnail a {
+			text-decoration: none; /* Removes underline */
+			color: inherit;
+			display: block; /* Makes the anchor span the entire thumbnail */
+		}
+
+		.video-thumbnail img {
+		
+			cursor: pointer; /* Ensures the cursor changes to a pointer on hover */
+			transition: transform 0.2s ease;
+		}
+		
+		/* Social page */
+		
+		/* Modal Styling */
+		.social-modal {
+			display: none; /* Hidden by default */
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: rgba(0, 0, 0, 0.7); /* Dim background */
+			z-index: 1000;
+			justify-content: center;
+			align-items: center;
+		}
+
+		.social-modal-content {
+			background: white;
+			padding: 20px;
+			border-radius: 10px;
+			text-align: center;
+			width: 300px;
+			box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+		}
+
+		.social-modal-content h3 {
+			margin-bottom: 15px;
+			font-size: 18px;
+			color: black;
+		}
+
+		.social-modal-content label {
+			display: block;
+			margin-bottom: 10px;
+			color: black;
+			font-size: 14px;
+		}
+
+		.social-modal-content input {
+			width: 100%;
+			padding: 10px;
+			margin-bottom: 20px;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+		}
+
+		.social-modal-buttons {
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.social-modal-buttons button {
+			padding: 10px 15px;
+			font-size: 14px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			width: 45%; /* Ensure buttons are equal width */
+		}
+
+		.social-modal-buttons #save-social-link-button {
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		.social-modal-buttons #cancel-social-link-button {
+			background-color: #F44336;
+			color: white;
+		}
+
+		.social-modal-buttons button:hover {
+			opacity: 0.9;
+		}
+		
+
+		#prompt-container {
+			position: fixed; /* Ensure it stays at the bottom */
+			bottom: 0;
+			left: 0;
+			width: 100%;
+			background-color: #333;
+			padding: 10px;
+			display: flex;
+			align-items: center;
+			gap: 10px;
+			z-index: 100; /* Keeps it above other content */
+		}
+
+        #message-input {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: #222;
+            border: none;
+            color: #fff;
+            border-radius: 15px;
+        }
+
+        #send-button {
+            background-color: #ff0000;
+            border: none;
+            padding: 10px 15px;
+            color: #ffffff;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #cc0000;
+        }
+		
+		#message-pane {
+		
+			height: 275px;
+			overflow-y: scroll;
+		
+		}
+		
+
+

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000000;
+            font-family: Arial, sans-serif;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+		@font-face {
+			font-family: 'Crunk';
+			src: url('fonts/TheDark.ttf') format('truetype');
+		}
+		@font-face {
+			font-family: 'Precious';
+			src: url('fonts/precious.ttf') format('truetype');
+		}
+		@font-face {
+			font-family: 'Eagle Horizon';
+			src: url('fonts/EagleHorizon.ttf') format('truetype');
+		}
+		@font-face {
+			font-family: 'Great Vibes';
+			src: url('fonts/GreatVibes-Regular.ttf') format('truetype');
+		}
+        .notebook-container {
+            position: relative;
+            width: 1200px; /* Doubled size */
+            height: 800px;
+        }
+        .notebook {
+            width: 100%;
+            height: auto;
+            position: absolute;
+			border: 1px solid #ffffff;
+			border-radius: 15px;
+        }
+        .form-container {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 485px;
+            margin-right: 20px;
+        }
+        form input, form textarea, form button {
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 22px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+			font-family: Great Vibes;
+        }
+        form textarea {
+            resize: none;
+            height: 480px;
+        }
+        form button {
+            background-color: #ff0000;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        form button:hover {
+            background-color: #cc0000;
+        }
+        .info-container {
+            position: absolute;
+            top: 45px;
+            right: 90px;
+            width: 35%;
+            font-family: Precious;
+            font-size: 25px;
+            color: #000000;
+        }
+        .info-container p {
+            margin-bottom: 20px;
+			text-align: center;
+			
+        }
+		#banner {
+			position: absolute;
+			font-family: Crunk;
+			font-size: 30px;
+			color: #000000;
+			right: 130px;
+			top: 15px;
+		
+		}
+    </style>
+</head>
+<body>
+    <div class="notebook-container">
+        <img src="gfx/notebook.png" alt="Notebook" class="notebook">
+        <div class="form-container">
+            <form action="mailto:youremail@example.com" method="post" enctype="text/plain">
+                <input type="text" name="name" placeholder="Your Name" required>
+                <input type="email" name="email" placeholder="Your Email" required>
+                <textarea name="message" placeholder="Your Message" required></textarea>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+		<div id='banner'>Teach Me How To Scream</div>
+        <div class="info-container">
+            <p>Name: John Doe</p>
+            <p>Email: johndoe@example.com</p>
+            <p>Phone: (123) 456-7890</p>
+        </div>
+		<div style='position; absolute; width: 60px; height: 60px; z-index: 99;' id='stamp-container'>
+			<img style='position: absolute; right: 55px; top: 530px; width: 190px; height: 120px;' src='gfx/red-wax.png' />
+		</div>
+    </div>
+</body>
+</html>

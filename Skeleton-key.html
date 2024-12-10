@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FBX Skeleton and Anatomical Data Extraction</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #001f3f;
+            color: white;
+        }
+        .container {
+            padding: 20px;
+        }
+        button {
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 16px;
+        }
+        input[type="file"] {
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload FBX File</h1>
+        <input type="file" id="fileInput" accept=".fbx" />
+        <button id="processButton">Process File</button>
+        <div id="output"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.0/umd/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/FBXLoader.js"></script>
+
+    <script>
+        document.getElementById("processButton").addEventListener("click", processFile);
+
+        function processFile() {
+            const fileInput = document.getElementById("fileInput");
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please upload an FBX file.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result;
+                parseFBXData(arrayBuffer);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function parseFBXData(arrayBuffer) {
+            const loader = new THREE.FBXLoader();
+            const scene = loader.parse(arrayBuffer);
+
+            // Extract anatomical and skeletal data
+            const anatomicalData = extractAnatomicalData(scene);
+            const skeletalData = createSkeletalMap(scene);
+
+            // Output the anatomical and skeletal data
+            console.log("Anatomical Data:", JSON.stringify(anatomicalData, null, 2));
+            console.log("Skeletal Data:", JSON.stringify(skeletalData, null, 2));
+
+            // Here you can generate downloadable files for both JSONs
+            downloadJSON(anatomicalData, 'anatomical_data.json');
+            downloadJSON(skeletalData, 'skeletal_data.json');
+        }
+
+        function extractAnatomicalData(scene) {
+            const anatomicalData = { parts: [] };
+
+            scene.traverse(function(child) {
+                if (child.isMesh) {
+                    const part = {
+                        name: child.name,
+                        position: {
+                            x: child.position.x,
+                            y: child.position.y,
+                            z: child.position.z
+                        },
+                        rotation: {
+                            x: child.rotation.x,
+                            y: child.rotation.y,
+                            z: child.rotation.z
+                        },
+                        scale: {
+                            x: child.scale.x,
+                            y: child.scale.y,
+                            z: child.scale.z
+                        }
+                    };
+                    anatomicalData.parts.push(part);
+                }
+            });
+
+            return anatomicalData;
+        }
+
+        function createSkeletalMap(scene) {
+            const skeletalData = { bones: [] };
+
+            scene.traverse(function(child) {
+                if (child.isMesh) {
+                    const boneData = {
+                        name: child.name,
+                        position: {
+                            x: child.position.x,
+                            y: child.position.y,
+                            z: child.position.z
+                        },
+                        rotation: {
+                            x: child.rotation.x,
+                            y: child.rotation.y,
+                            z: child.rotation.z
+                        },
+                        scale: {
+                            x: child.scale.x,
+                            y: child.scale.y,
+                            z: child.scale.z
+                        },
+                        parent: null // Parent-child relationships will be established
+                    };
+
+                    // Add bone data to the skeletal structure
+                    skeletalData.bones.push(boneData);
+                }
+            });
+
+            // Assign parent-child relationships based on proximity
+            skeletalData.bones.forEach(bone => {
+                const closestBone = findClosestBone(bone, skeletalData.bones);
+                if (closestBone) {
+                    bone.parent = closestBone.name;
+                }
+            });
+
+            return skeletalData;
+        }
+
+        function findClosestBone(bone, allBones) {
+            let closestBone = null;
+            let minDistance = Infinity;
+
+            const bonePosition = new THREE.Vector3(bone.position.x, bone.position.y, bone.position.z);  // Convert position to Vector3
+
+            allBones.forEach(otherBone => {
+                if (otherBone.name !== bone.name) {
+                    const otherBonePosition = new THREE.Vector3(otherBone.position.x, otherBone.position.y, otherBone.position.z);  // Convert position to Vector3
+                    const distance = bonePosition.distanceTo(otherBonePosition);  // Now use distanceTo
+
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestBone = otherBone;
+                    }
+                }
+            });
+
+            return closestBone;
+        }
+
+        function downloadJSON(data, filename) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Vocal Anatomy Animation</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #001f3f;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        /* Style for the camera position display */
+        #camera-coordinates {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: white;
+            opacity: 0.6;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="camera-coordinates">
+        Camera Position: <span id="camera-position">X: 0, Y: 0, Z: 0</span>
+    </div>
+
+    <!-- Load fflate first to resolve the dependency for FBXLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.0/umd/index.js"></script>
+    
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Load FBXLoader for loading the 3D models -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/FBXLoader.js"></script>
+
+    <!-- Load OrbitControls for camera manipulation -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+
+<script>
+    // Scene setup
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lighting setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight.position.set(10, 10, 10);
+    scene.add(directionalLight);
+
+    // OrbitControls setup
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+
+    // Add grid helper for reference
+    const gridHelper = new THREE.GridHelper(100, 10);
+    scene.add(gridHelper);
+
+    let throatModel, leftVocalCord, rightVocalCord, cricoidCartilage;
+
+    // Load FBX model and extract the vocal cords and cricoid cartilage
+    const fbxLoader = new THREE.FBXLoader();
+    fbxLoader.load('maya2sketchfab_Edit.fbx', (object) => {
+        console.log("FBX Model Loaded:", object);
+        throatModel = object;
+
+        // Center and normalize the model
+        const box = new THREE.Box3().setFromObject(throatModel);
+        const center = box.getCenter(new THREE.Vector3());
+        throatModel.position.sub(center);
+        throatModel.position.set(0, -25, 0); // Adjust Y-axis position for visibility
+        throatModel.scale.set(0.02, 0.02, 0.02); // Scale the model for visibility
+
+        // Traverse the model to find Left and Right Vocal Cords, and Cricoid Cartilage
+        throatModel.traverse((child) => {
+            console.log("Child Object Name:", child.name);
+
+            if (child.name.toLowerCase().includes("left_vocal_cord")) {
+                leftVocalCord = child;
+                console.log("Left Vocal Cord Found:", child);
+            }
+            if (child.name.toLowerCase().includes("right_vocal_cord")) {
+                rightVocalCord = child;
+                console.log("Right Vocal Cord Found:", child);
+            }
+            if (child.name.toLowerCase().includes("cricoid_cartilage")) {
+                cricoidCartilage = child;
+                console.log("Cricoid Cartilage Found:", child);
+            }
+        });
+
+        // Add the 3D model to the scene
+        scene.add(throatModel);
+        console.log("Model Position:", throatModel.position);
+    });
+
+    // Audio setup using Web Audio API
+    const audioListener = new THREE.AudioListener();
+    camera.add(audioListener);
+
+    const audioLoader = new THREE.AudioLoader();
+    const audio = new THREE.Audio(audioListener);
+    const analyser = new THREE.AudioAnalyser(audio, 256); // Audio analyser
+
+    // Handle file input for loading audio
+    const fileInput = document.getElementById("file-input");
+    fileInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            const fileReader = new FileReader();
+            fileReader.onload = function (e) {
+                const arrayBuffer = e.target.result;
+                audioLoader.load(arrayBuffer, (buffer) => {
+                    audio.setBuffer(buffer);
+                    audio.setLoop(true);
+                    audio.setVolume(1.0);
+                    audio.play();
+                    console.log("Audio Loaded and Playing");
+                });
+            };
+            fileReader.readAsArrayBuffer(file);
+        }
+    });
+
+    // Animation loop - update vocal cords and cricoid cartilage based on audio analysis
+    function animateVocalCords() {
+        requestAnimationFrame(animateVocalCords);
+
+        // Only animate if audio is playing
+        if (audio.isPlaying) {
+            // Get frequency data from the analyser
+            analyser.getFrequencyData();
+
+            // Get the maximum frequency value (helps to animate based on real audio data)
+            const maxAmplitude = Math.max(...analyser.frequencyData);
+
+            // Calculate movement based on amplitude
+            const movement = (maxAmplitude / 256) * -3; // Scale movement based on max amplitude
+
+            // Animate the vocal cords (move inward-outward based on amplitude)
+            if (leftVocalCord && rightVocalCord) {
+                leftVocalCord.position.x = movement;  // Move left vocal cord inward (close)
+                leftVocalCord.position.z = movement;  // Move left vocal cord inward (close)
+                rightVocalCord.position.x = -movement; // Move right vocal cord inward (close)
+                rightVocalCord.position.z = -movement; // Move right vocal cord inward (close)
+            }
+
+            // Animate the cricoid cartilage (shrink inward based on amplitude)
+            if (cricoidCartilage) {
+                cricoidCartilage.scale.set(1 + movement, 1, 1); // Shrink inward (collapse)
+            }
+
+            // Update controls and render the scene
+            controls.update();
+            renderer.render(scene, camera);
+
+            // Update the camera coordinates display
+            const cameraPosition = camera.position;
+            document.getElementById("camera-position").textContent = `X: ${cameraPosition.x.toFixed(2)}, Y: ${cameraPosition.y.toFixed(2)}, Z: ${cameraPosition.z.toFixed(2)}`;
+        }
+    }
+
+    animateVocalCords();
+
+    // Set the camera position to the requested coordinates
+    camera.position.set(5, 5, 5); // Adjusted for better visibility
+    camera.lookAt(0, 0, 0); // Ensure camera is looking at the model
+</script>
+
+
+</body>
+</html>

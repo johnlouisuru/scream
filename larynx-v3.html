@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Anatomical Larynx</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #001f3f;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: white;
+        }
+        .controls input[type="file"] {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #1f1f1f;
+            color: white;
+            border: 1px solid #fff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <canvas id="larynxCanvas"></canvas>
+    <div class="controls">
+        <label for="audioInput">Upload Singing Audio File:</label>
+        <input type="file" id="audioInput" accept="audio/*">
+    </div>
+
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("larynxCanvas") });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        // Background color
+        scene.background = new THREE.Color(0x001f3f);
+
+        // Orbit Controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // Smooth rotation
+        controls.dampingFactor = 0.05;
+        controls.rotateSpeed = 0.5;
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 2); // Soft light
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(10, 10, 10).normalize();
+        scene.add(ambientLight, directionalLight);
+
+        // Larynx Structure
+        const larynxMaterial = new THREE.MeshPhongMaterial({ color: 0xf9d7b9, side: THREE.DoubleSide });
+        const larynxGeometry = new THREE.CylinderGeometry(3, 3.5, 8, 32, 1, true);
+        const larynx = new THREE.Mesh(larynxGeometry, larynxMaterial);
+        larynx.position.set(0, 0, -3);
+        larynx.rotation.x = Math.PI / 2; // Align to match anatomy
+        scene.add(larynx);
+
+        // False Vocal Folds
+        const falseFoldMaterial = new THREE.MeshPhongMaterial({ color: 0xd65f5f, side: THREE.DoubleSide });
+        const falseFoldGeometry = new THREE.PlaneGeometry(3.2, 0.6);
+        const falseFoldLeft = new THREE.Mesh(falseFoldGeometry, falseFoldMaterial);
+        const falseFoldRight = new THREE.Mesh(falseFoldGeometry, falseFoldMaterial);
+
+        falseFoldLeft.rotation.y = Math.PI / 2;
+        falseFoldLeft.position.set(-1.5, 0.6, 0);
+        falseFoldRight.rotation.y = Math.PI / 2;
+        falseFoldRight.position.set(1.5, 0.6, 0);
+
+        scene.add(falseFoldLeft, falseFoldRight);
+
+        // True Vocal Folds
+        const trueFoldMaterial = new THREE.MeshPhongMaterial({ color: 0xff69b4, side: THREE.DoubleSide });
+        const trueFoldGeometry = new THREE.PlaneGeometry(2.8, 0.4);
+        const trueFoldLeft = new THREE.Mesh(trueFoldGeometry, trueFoldMaterial);
+        const trueFoldRight = new THREE.Mesh(trueFoldGeometry, trueFoldMaterial);
+
+        trueFoldLeft.rotation.y = Math.PI / 2;
+        trueFoldLeft.position.set(-1.4, -0.2, 0);
+        trueFoldRight.rotation.y = Math.PI / 2;
+        trueFoldRight.position.set(1.4, -0.2, 0);
+
+        scene.add(trueFoldLeft, trueFoldRight);
+
+        // Dynamic Black Circle (Rima Glottidis)
+        const circleGeometry = new THREE.CircleGeometry(0.8, 32);
+        const circleMaterial = new THREE.MeshBasicMaterial({ color: 0x000000 });
+        const circle = new THREE.Mesh(circleGeometry, circleMaterial);
+        circle.rotation.x = Math.PI / 2;
+        circle.position.set(0, -0.2, 0);
+        scene.add(circle);
+
+        // Animation variables
+        let foldAngle = 0.1; // Initial fold angle
+        let circleScale = 1; // Initial circle scale
+
+        // Audio setup
+        const audioInput = document.getElementById("audioInput");
+        let audioContext, analyzer, frequencyData;
+
+        audioInput.addEventListener("change", async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const audioData = await file.arrayBuffer();
+
+            if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await audioContext.decodeAudioData(audioData);
+
+            const source = audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+
+            analyzer = audioContext.createAnalyser();
+            analyzer.fftSize = 256;
+            frequencyData = new Uint8Array(analyzer.frequencyBinCount);
+
+            source.connect(analyzer);
+            analyzer.connect(audioContext.destination);
+
+            source.start();
+        });
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            if (analyzer) {
+                analyzer.getByteFrequencyData(frequencyData);
+                const maxAmplitude = Math.max(...frequencyData) / 255;
+
+                // Animate true folds
+                const foldRotation = maxAmplitude * 0.5;
+                trueFoldLeft.rotation.y = Math.PI / 2 - foldRotation;
+                trueFoldRight.rotation.y = Math.PI / 2 + foldRotation;
+
+                // Animate circle
+                circleScale = 1 - maxAmplitude * 0.9;
+                circle.scale.set(circleScale, circleScale, circleScale);
+            }
+
+            // Render scene
+            renderer.render(scene, camera);
+        }
+
+        // Camera position
+        camera.position.z = 15;
+
+        // Start animations
+        animate();
+    </script>
+</body>
+</html>

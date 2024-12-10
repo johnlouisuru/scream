@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Vocal Anatomy Animation</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #001f3f;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        /* Style for the camera position display */
+        #camera-coordinates {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: white;
+            opacity: 0.6;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        /* Style for the file input */
+        #file-input {
+            position: absolute;
+            top: 10px;
+            left: 120px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+	
+	<!-- Play Button to trigger audio playback -->
+	<button id="playButton" style="position: absolute; top: 50px; left: 10px;">Play Audio</button>
+
+	<!-- File Input for browsing and selecting audio file -->
+	<input id="file-input" type="file" accept="audio/mp3" style="position: absolute; top: 100px; left: 10px; padding: 10px;">
+
+    <div id="camera-coordinates">
+        Camera Position: <span id="camera-position">X: 0, Y: 0, Z: 0</span>
+    </div>
+
+    <!-- Left Div: Audio Analysis for dB, Frequency, Pitch, etc. -->
+    <div id="audio-analysis-left" style="position: absolute; bottom: 10px; left: 10px; color: white; font-size: 16px;">
+        <h3>Audio Analysis</h3>
+        <p><strong>dB:</strong> <span id="dataDb">-00.00</span></p>
+        <p><strong>Fundamental Frequency:</strong> <span id="dataFrequency">000.00 Hz</span></p>
+        <p><strong>Harmonics:</strong> <span id="dataHarmonics">0.00</span></p>
+        <p><strong>Pitch:</strong> <span id="dataPitch">000.00 Hz</span></p>
+        <p><strong>Gain:</strong> <span id="dataGain">0.00</span></p>
+        <p><strong>Distortion:</strong> <span id="dataDistortion">0.00</span></p>
+    </div>
+
+    <!-- Right Div: Audio Analysis for Amplitude, Frequency Data, Time -->
+    <div id="audio-analysis-right" style="position: absolute; bottom: 10px; right: 10px; color: white; font-size: 16px;">
+        <h3>Audio Analysis</h3>
+        <p><strong>Amplitude:</strong> <span id="infoAmplitude">0</span></p>
+        <p><strong>Frequency Data (Avg):</strong> <span id="infoFrequency">0</span></p>
+        <p><strong>Playing Time:</strong> <span id="infoTime">0:00</span></p>
+    </div>
+
+    <!-- Load fflate first to resolve the dependency for FBXLoader -->
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.0/umd/index.js"></script>
+    
+    <!-- Load Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- Load FBXLoader for loading the 3D models -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/FBXLoader.js"></script>
+
+    <!-- Load OrbitControls for camera manipulation -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+<script>
+	
+
+
+    let audioContext, audioAnalyser, audioSourceNode, amplitudeDataArray, frequencyDataArray;
+    let throatModel, leftVocalCord, rightVocalCord, cricoidCartilage;
+
+    // Audio analysis setup
+    function setupAudioAnalysis() {
+        // Create a new audio context
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // Create an analyser node
+        audioAnalyser = audioContext.createAnalyser();
+        audioAnalyser.fftSize = 256;  // Number of frequency bins
+
+        // Create arrays to hold amplitude and frequency data
+        amplitudeDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+        frequencyDataArray = new Uint8Array(audioAnalyser.frequencyBinCount);
+
+        // Setup a gain node
+        const audioGainNode = audioContext.createGain();
+        audioGainNode.gain.value = 1;  // Set volume to full
+
+        // Create an audio source (this will be hooked to the file input)
+        audioSourceNode = audioContext.createBufferSource();
+        audioSourceNode.connect(audioGainNode);
+        audioGainNode.connect(audioAnalyser);
+        audioAnalyser.connect(audioContext.destination);
+
+        // Handle file input for audio file loading
+        document.getElementById("file-input").addEventListener("change", handleFileSelect, false);
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const fileReader = new FileReader();
+            fileReader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                audioContext.decodeAudioData(arrayBuffer, (audioBuffer) => {
+                    audioSourceNode.buffer = audioBuffer;
+                    audioSourceNode.start();
+                });
+            };
+            fileReader.readAsArrayBuffer(file);
+        }
+    }
+
+    // Function to update the audio analysis data
+    function updateAudioAnalysisData() {
+        if (audioContext.state === 'running') {
+            audioAnalyser.getByteFrequencyData(frequencyDataArray);
+            audioAnalyser.getByteTimeDomainData(amplitudeDataArray);
+
+            // Calculate average frequency
+            const avgFrequency = frequencyDataArray.reduce((sum, value) => sum + value, 0) / frequencyDataArray.length;
+
+            // Calculate average amplitude
+            const avgAmplitude = amplitudeDataArray.reduce((sum, value) => sum + value, 0) / amplitudeDataArray.length;
+
+            // Calculate dB
+            const dBLevel = 20 * Math.log10(avgAmplitude / 255);
+
+            // Update UI elements with the analysis data
+            document.getElementById("dataDb").textContent = dBLevel.toFixed(2);
+            document.getElementById("dataFrequency").textContent = `${avgFrequency.toFixed(2)} Hz`;
+            document.getElementById("dataHarmonics").textContent = `${(avgFrequency * 2).toFixed(2)}`;
+            document.getElementById("dataPitch").textContent = `${(avgFrequency).toFixed(2)} Hz`;
+            document.getElementById("dataGain").textContent = `${(avgAmplitude / 255).toFixed(2)}`;
+            document.getElementById("dataDistortion").textContent = `${Math.abs(avgAmplitude - 128).toFixed(2)}`;
+
+            // Update right-side analysis
+            document.getElementById("infoAmplitude").textContent = avgAmplitude.toFixed(2);
+            document.getElementById("infoFrequency").textContent = avgFrequency.toFixed(2);
+            document.getElementById("infoTime").textContent = formatTime(audioContext.currentTime);
+        }
+    }
+
+    // Helper function to format time
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60).toString().padStart(2, "0");
+        return `${minutes}:${secs}`;
+    }
+
+    // Audio analysis update loop
+    function update() {
+        updateAudioAnalysisData();
+        requestAnimationFrame(update);
+    }
+
+    // Initialize audio analysis
+    setupAudioAnalysis();
+    update();  // Start the loop for updating the analysis
+</script>
+<script>
+    // Scene setup for the 3D model
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lighting setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight.position.set(10, 10, 10);
+    scene.add(directionalLight);
+
+    // OrbitControls setup
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+
+    // Load FBX model
+    const fbxLoader = new THREE.FBXLoader();
+    fbxLoader.load('maya2sketchfab_Edit.fbx', (object) => {
+        throatModel = object;
+        const box = new THREE.Box3().setFromObject(throatModel);
+        const center = box.getCenter(new THREE.Vector3());
+        throatModel.position.sub(center);
+        throatModel.position.set(0, -25, 0);
+        throatModel.scale.set(0.02, 0.02, 0.02);
+        scene.add(throatModel);
+    });
+
+    // Render the scene
+    function renderScene() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(renderScene);
+    }
+
+    renderScene();
+    camera.position.set(5, 5, 5);
+    camera.lookAt(0, 0, 0);
+</script>
+</body>
+</html>

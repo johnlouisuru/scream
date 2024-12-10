@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Vocal Anatomy Animation</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #001f3f;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        /* Style for the camera position display */
+        #camera-coordinates {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 16px;
+            color: white;
+            opacity: 0.6;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="camera-coordinates">
+        Camera Position: <span id="camera-position">X: 0, Y: 0, Z: 0</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.0/umd/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/FBXLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(10, 10, 10);
+        scene.add(directionalLight);
+
+        // OrbitControls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        let throatModel, vocalCordsMesh, leftVocalLigament, rightVocalLigament, analyser, audio;
+
+        // Load FBX model and extract the vocal cords mesh and ligaments
+        const fbxLoader = new THREE.FBXLoader();
+        fbxLoader.load('maya2sketchfab.fbx', (object) => {
+            console.log("FBX Model Loaded:", object);
+            throatModel = object;
+
+            // Center and normalize the model
+            const box = new THREE.Box3().setFromObject(throatModel);
+            const center = box.getCenter(new THREE.Vector3());
+            throatModel.position.sub(center); // Center the model
+            throatModel.position.set(0, -25, 0); // Adjust position
+            throatModel.scale.set(0.02, 0.02, 0.02); // Scale it down to a visible size
+
+            // Traverse the model to find vocal cords and ligaments
+            throatModel.traverse((child) => {
+                if (child.name.toLowerCase().includes("vocal")) {
+                    vocalCordsMesh = child; // Assign the vocal cords mesh
+                    console.log("Vocal Cords Mesh Found:", child);
+                }
+                if (child.name.toLowerCase().includes("ligament")) {
+                    // Find left and right ligaments
+                    if (child.name.toLowerCase().includes("left")) {
+                        leftVocalLigament = child;
+                    } else if (child.name.toLowerCase().includes("right")) {
+                        rightVocalLigament = child;
+                    }
+                }
+            });
+
+            // Add the 3D model to the scene
+            scene.add(throatModel);
+        });
+
+        // Audio setup using Web Audio API
+        const audioListener = new THREE.AudioListener();
+        camera.add(audioListener);
+
+        const audioLoader = new THREE.AudioLoader();
+        audio = new THREE.Audio(audioListener);
+
+        // Create a play button to initialize the AudioContext on user interaction
+        const playButton = document.createElement("button");
+        playButton.textContent = "Play Audio";
+        document.body.appendChild(playButton);
+
+        playButton.addEventListener("click", () => {
+            // Load the audio when the user clicks the button
+            audioLoader.load('sample-1.mp3', (buffer) => {
+                audio.setBuffer(buffer);
+                audio.setLoop(true);
+                audio.setVolume(1.0);
+                console.log("Audio Loaded Successfully");
+
+                // Set up the analyser to get frequency data
+                analyser = new THREE.AudioAnalyser(audio, 256);
+
+                // Play the audio once it's loaded
+                audio.play();
+                console.log("Audio is now playing!");
+            });
+        });
+
+        // Animation loop - update vocal cords and ligaments based on audio analysis
+        function animateVocalCords() {
+            requestAnimationFrame(animateVocalCords);
+
+            // Only animate if audio is playing
+            if (audio.isPlaying) {
+                // Get audio data (amplitude of the sound)
+                const amplitude = analyser.getAverageFrequency() / 256; // Normalize amplitude
+                console.log("Amplitude:", amplitude);
+
+                // Animate the vocal cords (scaling along the X-axis)
+                if (vocalCordsMesh) {
+                    let scaleFactor = 1 + amplitude * 0.5; // Scale factor based on amplitude
+                    vocalCordsMesh.scale.x = scaleFactor;  // Adjust scale in X (horizontal opening)
+                    vocalCordsMesh.scale.z = scaleFactor;  // Adjust scale in Z (depth opening)
+                }
+
+                // Animate ligaments (stretching or rotating)
+                if (leftVocalLigament) {
+                    leftVocalLigament.scale.y = 1 + amplitude * 0.2; // Slight stretching based on amplitude
+                }
+                if (rightVocalLigament) {
+                    rightVocalLigament.scale.y = 1 + amplitude * 0.2; // Slight stretching based on amplitude
+                }
+
+                // Update controls and render the scene
+                controls.update();
+                renderer.render(scene, camera);
+
+                // Update the camera coordinates display
+                const cameraPosition = camera.position;
+                document.getElementById("camera-position").textContent = `X: ${cameraPosition.x.toFixed(2)}, Y: ${cameraPosition.y.toFixed(2)}, Z: ${cameraPosition.z.toFixed(2)}`;
+            }
+        }
+
+        animateVocalCords();
+
+        // Set the camera position to the requested coordinates
+        camera.position.set(2, 4.25, 2.26);
+        camera.lookAt(0, 0, 0); // Adjust this as needed to look at the model
+    </script>
+</body>
+</html>

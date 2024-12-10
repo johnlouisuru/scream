@@ -1,0 +1,372 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Visualizer</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        @font-face {
+            font-family: 'Deathcore';
+            src: url('fonts/Faceless.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'Crunk';
+            src: url('fonts/TheDark.ttf') format('truetype');
+        }
+        div#content-1 {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #000000;
+            overflow: hidden;
+        }
+        div#nav-bar {
+            position: fixed;
+            width: 100%;
+            height: 50px;
+            background-color: #131313;
+            border-bottom: solid 1px #ff0000;
+        }
+        select, button {
+            border-radius: 15px;
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            background-color: #000000;
+            width: 175px;
+            height: 36px;
+            margin-top: 9px;
+            margin-left: 20px;
+        }
+        img#profile-picture {
+            margin-top: 30px;
+            width: 350px;
+            height: 300px;
+            border: 1px solid #ffffff;
+        }
+        audio {
+            height: 45px;
+            border-radius: 0px;
+            border: 2px solid #ffffff;
+            background-color: #131313;
+        }
+        canvas {
+            width: 48%;
+            height: 135px;
+            background-color: #000000;
+        }
+        #controls {
+            position: absolute;
+            bottom: 193px;
+            right: 30px;
+        }
+        button {
+            margin-left: 5px;
+            padding: 10px;
+            background-color: #ff0000;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #cc0000;
+        }
+        .info {
+            font-family: Arial;
+            position: absolute;
+            width: 320px;
+            height: 150px;
+            background-color: #808080;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+        #info-artist {
+            bottom: 235px;
+            left: 30px;
+        }
+        #info-user {
+            bottom: 235px;
+            right: 30px;
+        }
+        div#bio {
+            float: left;
+        }
+        div#name-info {
+            margin-left: 20px;
+            font-size: 30px;
+            font-family: Deathcore;
+            color: #ffffff;
+        }
+        div#band-info {
+            margin-left: 28px;
+            font-size: 20px;
+            font-family: Arial;
+            color: #ffffff;
+        }
+        div#lyrics {
+            position: absolute;
+            left: 500px;
+            width: 930px;
+            height: 350px;
+            border-radius: 15px;
+            background-color: #131313;
+            color: #ffffff;
+            font-family: Arial;
+        }
+    </style>
+</head>
+<body>
+    <div id='content-1'>
+        <div id='nav-bar'>
+            <select id='vocal-style'>
+                <option>Fry</option>
+                <option>False Chord</option>
+                <option>Gutterals</option>
+            </select>
+            <select id='vocal-artist'>
+                <option>Danny Worsnop</option>
+                <option>Alex Terrible</option>
+                <option>Cj McCreery</option>
+            </select>
+            <button id="generateSampleBtn">Generate New Sample</button>
+            <button id="downloadSampleBtn">Download Sample</button>
+        </div>
+        <br>
+        <div style='margin-top: 20px;margin-left: 10px;'>
+            <img id='profile-picture' src='profile_pics/CJ_McCreery.jpg'>
+        </div>
+        <div id='bio'>
+            <div id='name-info'>Alex Terrible</div>
+            <div id='band-info'>Band: Slaughter to Prevail</div>
+        </div>
+        <div id="controls">
+            <button id="recordBtn">Record</button>
+            <button id="stopBtn" disabled>Stop</button>
+            <button id="downloadBtn" disabled>Download</button>
+            <button id="compareBtn" disabled>Compare Audio</button>
+        </div>
+        <div style='position: absolute; bottom: 5px;width:100%;left: 30px;'>
+            <canvas style='margin-left: 932px; margin-bottom: -135px;' id='canvas-user'></canvas>
+            <canvas style='margin-left: 2px;' id='canvas-artist'></canvas>
+            <audio id='artist-audio' style='width:48%;' src='samples/false_chord/alex_terrible/sample-1.mp3' controls></audio>
+            <audio id='user-audio' style='width:48%;' controls></audio>
+        </div>
+        <div id="info-artist" class="info">
+            <strong>Artist Audio:</strong>
+            <div id="dB-artist">dB: </div>
+            <div id="fundamental-artist">Fundamental Frequency: </div>
+            <div id="dominant-artist">Dominant Frequency: </div>
+            <div id="harmonics-artist">Harmonics: </div>
+            <div id="pitch-artist">Pitch: </div>
+            <div id="key-artist">Key: </div>
+        </div>
+        <div id="info-user" class="info">
+            <strong>User Audio:</strong>
+            <div id="dB-user">dB: </div>
+            <div id="fundamental-user">Fundamental Frequency: </div>
+            <div id="dominant-user">Dominant Frequency: </div>
+            <div id="harmonics-user">Harmonics: </div>
+            <div id="pitch-user">Pitch: </div>
+            <div id="key-user">Key: </div>
+        </div>
+        <div id='lyrics'>
+            Hell is right here! You've been abandoned, you've been abandoned! Hell is right here! Kingdom of storm and thunder
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let artistPaused = true;
+            let userPaused = true;
+
+            const artistAudio = document.getElementById('artist-audio');
+            const userAudio = document.getElementById('user-audio');
+            const canvasArtist = document.getElementById('canvas-artist');
+            const canvasUser = document.getElementById('canvas-user');
+            const ctxArtist = canvasArtist.getContext('2d');
+            const ctxUser = canvasUser.getContext('2d');
+
+            // Set canvas dimensions based on their offset sizes
+            canvasArtist.width = canvasArtist.offsetWidth;
+            canvasArtist.height = canvasArtist.offsetHeight;
+            canvasUser.width = canvasUser.offsetWidth;
+            canvasUser.height = canvasUser.offsetHeight;
+
+            let isRecording = false;
+            let mediaRecorder;
+            let recordedChunks = [];
+
+            // Record functionality
+            recordBtn.addEventListener('click', function() {
+                recordedChunks = [];
+                navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    isRecording = true;
+                    recordBtn.disabled = true;
+                    stopBtn.disabled = false;
+
+                    mediaRecorder.ondataavailable = function(event) {
+                        recordedChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = function() {
+                        const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                        userAudio.src = URL.createObjectURL(blob);
+                        downloadBtn.disabled = false;
+                    };
+                });
+            });
+
+            stopBtn.addEventListener('click', function() {
+                if (isRecording) {
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    recordBtn.disabled = false;
+                    stopBtn.disabled = true;
+                }
+            });
+
+            // Download functionality
+            downloadBtn.addEventListener('click', function() {
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'recording.webm';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            });
+
+            // Set up the audio visualizer
+            function setupAudioVisualizer(audioElement, canvasContext, color, infoPrefix) {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                const source = audioContext.createMediaElementSource(audioElement);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                function draw() {
+                    requestAnimationFrame(draw);
+                    analyser.getByteTimeDomainData(dataArray);
+
+                    canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
+                    canvasContext.lineWidth = 2;
+                    canvasContext.strokeStyle = color;
+
+                    canvasContext.beginPath();
+                    const sliceWidth = canvasContext.canvas.width / bufferLength;
+                    let x = 0;
+
+                    for (let i = 0; i < bufferLength; i++) {
+                        const v = dataArray[i] / 128.0;
+                        const y = v * canvasContext.canvas.height / 2;
+
+                        if (i === 0) {
+                            canvasContext.moveTo(x, y);
+                        } else {
+                            canvasContext.lineTo(x, y);
+                        }
+                        x += sliceWidth;
+                    }
+                    canvasContext.lineTo(canvasContext.canvas.width, canvasContext.canvas.height / 2);
+                    canvasContext.stroke();
+
+                    updateAudioInfo(analyser, infoPrefix);
+                }
+                draw();
+            }
+
+            // Updates the audio info (dB, frequencies, etc.)
+            function updateAudioInfo(analyser, prefix) {
+                const bufferLength = analyser.fftSize;
+                const dataArray = new Float32Array(bufferLength);
+                analyser.getFloatFrequencyData(dataArray);
+
+                const dB = Math.max(...dataArray);
+                const fundamentalFrequency = findFundamentalFrequency(dataArray, analyser.fftSize);
+                const dominantFrequency = findDominantFrequency(dataArray, analyser.fftSize);
+                const harmonics = findHarmonics(dataArray, fundamentalFrequency);
+                const pitch = findPitch(fundamentalFrequency);
+                const key = findKey(fundamentalFrequency);
+
+                document.getElementById(`${prefix}-dB`).textContent = `dB: ${dB.toFixed(2)}`;
+                document.getElementById(`${prefix}-fundamental`).textContent = `Fundamental Frequency: ${fundamentalFrequency.toFixed(2)} Hz`;
+                document.getElementById(`${prefix}-dominant`).textContent = `Dominant Frequency: ${dominantFrequency.toFixed(2)} Hz`;
+                document.getElementById(`${prefix}-harmonics`).textContent = `Harmonics: ${harmonics.join(', ')}`;
+                document.getElementById(`${prefix}-pitch`).textContent = `Pitch: ${pitch}`;
+                document.getElementById(`${prefix}-key`).textContent = `Key: ${key}`;
+            }
+
+            // Calculate the fundamental frequency
+            function findFundamentalFrequency(dataArray, fftSize) {
+                const nyquist = fftSize / 2;
+                let maxAmplitude = -Infinity;
+                let index = -1;
+
+                for (let i = 0; i < dataArray.length; i++) {
+                    if (dataArray[i] > maxAmplitude) {
+                        maxAmplitude = dataArray[i];
+                        index = i;
+                    }
+                }
+                return (index * nyquist) / dataArray.length;
+            }
+
+            // Same logic for dominant frequency (you could refine this for more advanced analysis)
+            function findDominantFrequency(dataArray, fftSize) {
+                return findFundamentalFrequency(dataArray, fftSize);
+            }
+
+            // Dummy function to find harmonics based on fundamental frequency
+            function findHarmonics(dataArray, fundamentalFrequency) {
+                let harmonics = [];
+                for (let i = 2; i <= 5; i++) {
+                    harmonics.push((fundamentalFrequency * i).toFixed(2));
+                }
+                return harmonics;
+            }
+
+            // Mapping frequencies to musical pitches (A, B, C, etc.)
+            function findPitch(frequency) {
+                const pitches = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const A4 = 440;
+                let noteNumber = 12 * (Math.log(frequency / A4) / Math.log(2));
+                noteNumber = Math.round(noteNumber) + 69;
+                return pitches[noteNumber % 12];
+            }
+
+            // Mapping frequencies to musical key (rough estimate)
+            function findKey(frequency) {
+                const pitch = findPitch(frequency);
+                const keyMap = {
+                    'C': 'C Major',
+                    'C#': 'C# Major',
+                    'D': 'D Major',
+                    'D#': 'D# Major',
+                    'E': 'E Major',
+                    'F': 'F Major',
+                    'F#': 'F# Major',
+                    'G': 'G Major',
+                    'G#': 'G# Major',
+                    'A': 'A Major',
+                    'A#': 'A# Major',
+                    'B': 'B Major'
+                };
+                return keyMap[pitch];
+            }
+
+            setupAudioVisualizer(artistAudio, ctxArtist, '#ff0000', 'artist');
+            setupAudioVisualizer(userAudio, ctxUser, '#00ff00', 'user');
+        });
+    </script>
+</body>
+</html>
