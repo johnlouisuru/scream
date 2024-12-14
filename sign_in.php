@@ -138,6 +138,7 @@
                 <button type="submit" id="sign-up-button" disabled>Sign Up</button>
             </form>
             <p>Already have an account? <a href="javascript:void(0);" onclick="toggleSignIn()">Sign In</a></p>
+            <p> <a href="./index/">Back to Homepage</a></p>
 
             <!-- Image Upload and Cropper -->
 
