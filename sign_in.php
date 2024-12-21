@@ -114,6 +114,8 @@
                 <button type="submit">Sign In</button>
             </form>
             <p>Don't have an account? <a href="javascript:void(0);" onclick="toggleSignUp()">Sign Up</a></p>
+            <p> <a href="./index/">Back to Homepage</a></p>
+            <p> <a href="admin/admin-login.php">Admin Login</a></p>
         </div>
 
         <!-- Sign-up Form -->
@@ -138,7 +140,7 @@
                 <button type="submit" id="sign-up-button" disabled>Sign Up</button>
             </form>
             <p>Already have an account? <a href="javascript:void(0);" onclick="toggleSignIn()">Sign In</a></p>
-            <p> <a href="./index/">Back to Homepage</a></p>
+            
 
             <!-- Image Upload and Cropper -->
 

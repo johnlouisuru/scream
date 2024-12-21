@@ -1,6 +1,13 @@
 <?php 
 include_once("config.php");
 session_start();
+require('fb_time_ago.php');
+if(@$_SESSION['user_id'] != '' || !empty(@$_SESSION['user_id'])){
+    //echo $_SESSION['user_id'];
+}
+else {
+    header('Location: index/');
+}
 
 ?>
 <html>
@@ -10,6 +17,7 @@ session_start();
     <title>Teach Me How To Scream</title>
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
+    <script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> 
     
 </head>
 <body>
@@ -22,7 +30,7 @@ session_start();
     <!-- Profile Section -->
     <div id="profile-section">
 		<a href="#" id="profile-picture-anchor">
-        <img id="profile-picture" src="profile_pics/CJ_McCreery.jpg" alt="Profile Picture">
+        <img id="profile-picture" src="<?=$_SESSION['image']?>" alt="Profile Picture">
         </a>
     <!-- Overlay for the popup window -->
     <!-- Hidden File Input for Image Upload -->
@@ -39,14 +47,38 @@ session_start();
 
     <!-- Overlay -->
     <div class="overlay" id="overlay"></div>
-        <div id="bio">
+    <div id="bio">
+    <a href="user-profile.php">Back ↩</a>
+            <?php 
+            $query = mysqli_query($conn,"select * from user_detail WHERE user_id=$_SESSION[user_id]");
+            $result = $query->fetch_assoc();  
+            if($result){ ?>
+            
+            <div id="name-info"><?=@$_SESSION['username']?></div><div id='save-discard-container'></div>
+            <a><div id="band-info">Bands: <?=$result['band']?></div></a>
+            <a href="#" id='profile-change' style="text-decoration: none;" onclick="javascript: updateBio(0);">
+            <div id="bio-info">
+                <?=$result['bio']?>
+            </div>
+            </a>
+            <?php } else { ?>
+            <div id="name-info"><?=@$_SESSION['username']?></div><div id='save-discard-container'></div>
+            <div id="band-info">Bands: [N/A]</div>
+            <a href="#" id='profile-change' style="text-decoration: none;" onclick="javascript: updateBio(0);">
+            <div id="bio-info">
+                [N/A]
+            </div>
+            </a>
+            <?php } ?>
+        </div>
+        
+        <!--    <div id="bio">
             <div id="name-info">Alex Terrible</div><div id='save-discard-container'></div>
             <a><div id="band-info">Bands: Slaughter to Prevail</div></a>
 			<a href="#" id='profile-change' style="text-decoration: none;" onclick="javascript: updateBio(0);">
             <div id="bio-info">Alex Terrible is known for his powerful and intense vocal techniques, pioneering extreme vocal styles in metal music. With a deep passion for metal, he has pushed the boundaries of vocal performance, incorporating various screaming and growling techniques that captivate audiences worldwide. This is placeholder text describing his background, achievements, and influence on the genre.</div>
 			</a>
-        </div>
-        
+        </div> -->
         <div id="ad-1">
             <img style="width: 100%; height: 100%;" src="gfx/ad.png" alt="Advertisement">
         </div>
@@ -80,8 +112,6 @@ session_start();
                     }
                 }
             ?>
-			 
-			
         </div>
         
 		<!-- Modal for Adding Video -->
@@ -98,36 +128,58 @@ session_start();
 			</div>
 		</div>
 	</div>
-        <div id="questions" class="tab-content">
+    <div id="questions" class="tab-content">
             <h2>Questions</h2>
             <div class="conversation-container" id="conversation-container">
-				<div id='message-pane'>
-                <div class="message artist-message">
-                    <div class="profile-picture-circle">
-                        <img src="profile_pics/CJ_McCreery.jpg" alt="Artist Profile">
-                    </div>
-                    <div>
-                        <div class="artist-name">Alex Terrible <span class="timestamp">10:15 AM</span></div>
-                        <div class="message-bubble">What techniques do you use for distortion?</div>
-                    </div>
-                </div>
-				
-					<div class="message user-message">
-						<div>
-							<div class="user-name">XGuest_UserX <span class="timestamp">10:16 AM</span></div>
-							<div class="message-bubble">I mostly practice false chord exercises. Any tips?</div>
-						</div>
-						<div class="profile-picture-circle">
-							<img src="gfx/user_profile.png" alt="User Profile">
-						</div>
-					</div>
-                </div>
-				<!-- Prompt Section -->
+            <?php
+                $get_qs = mysqli_query($conn,"SELECT * FROM question WHERE profile_owner = '".$_SESSION['user_id']."' ORDER BY date DESC");
+                if(mysqli_num_rows($get_qs)>= 1){ 
+                    while($qs = mysqli_fetch_array($get_qs)){
+                        $date_filed = date("d-M-Y H:i", strtotime($qs['date']));
+                        if($_SESSION['user_id'] == $qs['other_id']){ //This is if Owner is the meesage
+                        ?>
+                            <div class="message artist-message">
+                                <div class="profile-picture-circle">
+                                    <img src="<?=$_SESSION['image']?>" alt="Artist Profile">
+                                </div>
+                                <div>
+                                    <div class="artist-name"><?=$_SESSION['username']?> <span class="timestamp"><?=facebook_time_ago($date_filed)?></span></div>
+                                    <div class="message-bubble"><?=$qs['message']?></div>
+                                </div>
+                            </div>
+                        <?php
+                        }
+                        else { ?>
+                        <div class="message user-message">
+                            <div>
+                                <div class="user-name">XGuest_UserX <span class="timestamp"><?=facebook_time_ago($date_filed)?></span></div>
+                                <div class="message-bubble"><?=$qs['message']?></div>
+                            </div>
+                            <div class="profile-picture-circle">
+                                <img src="gfx/q_user.png" alt="User Profile">
+                            </div>
+                        </div>
+                        <?php
+
+                        }
+                    
+                    }
+                }
+                else { ?>
+                <div class="message user-message">
+                    <p>No Questions/Message yet.</p>             
+                <!-- <div>
+                                <div class="user-name">XDummyX <span class="timestamp">Yesterday</span></div>
+                                <div class="message-bubble">This is a Dummy Text...</div>
+                            </div>
+                            <div class="profile-picture-circle">
+                                <img src="gfx/q_user.png" alt="User Profile">
+                            </div> -->
+                        </div>
+            <?php } ?>
+
+                
             </div>
-			<div id="prompt-container" style="display: none;">
-					<input id="message-input" type="text" placeholder="Type a message..." />
-					<button id="send-button">Send</button>
-				</div>
         </div>
 
         <div id="social" class="tab-content">

@@ -1,4 +1,5 @@
 <?php
+session_start();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get user data from the form
     $username = $_POST['username'];
@@ -73,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($result->num_rows > 0) {
         echo json_encode(['error' => 'Email is already registered.']);
+         header('Location:sign_in.php');
         exit;
     }
 
@@ -82,9 +84,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->execute();
 
     if ($stmt->affected_rows > 0) {
+        $last_id = $conn->insert_id;
+        $_SESSION['user_email'] = $email;
+        $_SESSION['user_id'] = $last_id;  
+        $_SESSION['username'] = $_POST['username'];
+        $_SESSION['image'] = $profile_picture;
         echo json_encode(['success' => 'User registered successfully!']);
+        header('Location:user-profile.php');
     } else {
         echo json_encode(['error' => 'An error occurred during registration.']);
+        header('Location:sign_in.php');
     }
 
     $stmt->close();

@@ -120,6 +120,22 @@
 					<div class="video-title">${inputTitle || 'New Tutorial'}</div>
 				`;
 				tutorialsContainer.appendChild(newVideoDiv);
+
+				var formData = {
+                    new_link : inputUrl,
+					new_title: inputTitle
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "add-link.php",
+                    data: formData,
+                    dataType: "json",
+                    encode: true,
+                }).done(function(data) {
+                    console.log(data['message']);
+                });
+
+
 			}
 
 			// Close the popup
@@ -146,6 +162,7 @@
         }
 		
 		function updateBio(x) {
+			//alert('ypoiu clicked!');
 			let currentBio = document.getElementById('bio-info');
 			let buttonContainer = document.getElementById('save-discard-container');
 			let profileChange = document.getElementById('profile-change');
@@ -161,9 +178,22 @@
 			if (x == 2) {
 				// Save changes
 				let newBioText = document.getElementById('bio-form').value; // Get updated text
+				let mess_holder;
 				currentBio.innerHTML = newBioText; // Replace bio with updated text
 				buttonContainer.innerHTML = ''; // Remove save and discard buttons
 				profileChange.onclick = function() { updateBio(0); }; // Re-enable editing by clicking profile change
+				var formData = {
+                    mess_holder : newBioText
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "update-bio.php",
+                    data: formData,
+                    dataType: "json",
+                    encode: true,
+                }).done(function(data) {
+                    console.log(data['message']);
+                });
 			}
 
 			if (x == 3) {
@@ -271,34 +301,40 @@
 
         function sendMessage() {
             const message = document.getElementById("message-input").value;
+            //const profile_owner = document.getElementById("profile_owner").value;
             if (message.trim()) {
-                const container = document.getElementById("message-pane");
-				const proPic = (document.getElementById('profile-picture').src);
-				const now = new Date();
-				const month = now.getMonth() + 1; // Add 1 to make it one-based
-				const day = now.getDate(); // Correct day of the month
-				const year = now.getFullYear(); // Get full year
-				const compDate = month + '/' + day + '/' + year + ' '; // Format as MM/DD/YYYY
-				const hours = now.getHours();
-				const minutes = now.getMinutes();
-				const formattedTime = formatTime(hours, minutes);
+                const container = document.getElementById("conversation-container");
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const formattedTime = formatTime(hours, minutes);
 
-				const userMessage = document.createElement("div");
-				const usersName = document.getElementById('name-info').innerHTML;
-
-				userMessage.className = "message user-message";
-				userMessage.innerHTML = `
-					<div>
-						<div class="user-name">${usersName}<span class="timestamp">${compDate}${formattedTime}</span></div>
-						<div class="message-bubble">${message}</div>
-					</div>
-					<div class="profile-picture-circle">
-						<img src="${proPic}" alt="User Profile">
-					</div>
-				`;
-				container.prepend(userMessage);
+                const userMessage = document.createElement("div");
+                userMessage.className = "message user-message";
+                userMessage.innerHTML = `
+                    <div>
+                        <div class="user-name"><?=$_SESSION['username']?><span class="timestamp">${formattedTime}</span></div>
+                        <div class="message-bubble">${message}</div>
+                    </div>
+                    <div class="profile-picture-circle">
+                        <img src="<?=$_SESSION['image']?>" alt="User Profile">
+                    </div>
+                `;
+                container.prepend(userMessage);
                 document.getElementById("message-input").value = "";
             }
+            var formData = {
+                    message : message
+                };
+                $.ajax({
+                    type: "POST",
+                    url: "add-qs.php",
+                    data: formData,
+                    dataType: "json",
+                    encode: true,
+                }).done(function(data) {
+                    console.log(data['message']);
+                });
         }
 
         document.getElementById("send-button").addEventListener("click", sendMessage);

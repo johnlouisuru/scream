@@ -2,6 +2,12 @@
 include_once("config.php");
 session_start();
 require('fb_time_ago.php');
+if(@$_SESSION['user_id'] != '' || !empty(@$_SESSION['user_id'])){
+    //echo "<h1>".$_SESSION['user_id']."</h1>";
+}
+else {
+    header('Location: index/');
+}
 
 ?>
 <html>
@@ -15,25 +21,32 @@ require('fb_time_ago.php');
 <body>
     <!-- Navigation Bar -->
     <div id="nav-bar">
-        <div id="banner">Teach Me How To Scream AI</div>
+        <div id="banner">Teach Me How To Scream AI </div>
         <a href="logout.php"><img id="paypal-button" src="gfx/paypal.png" alt="PayPal Button"></a>
     </div>
 
     <!-- Profile Section -->
     <div id="profile-section">
-        <img id="profile-picture" src="<?=@$_SESSION['image']?>" alt="Profile Picture">
+        <img id="profile-picture" src="<?=$_SESSION['image']?>" alt="<?=$_SESSION['image']?>">
         
         <div id="bio">
+        <a href="user-profile-edit.php">Update ✎</a>
             <?php 
             $query = mysqli_query($conn,"select * from user_detail WHERE user_id=$_SESSION[user_id]");
             $result = $query->fetch_assoc();  
-            
-            ?>
+            if($result){ ?>
             <div id="name-info"><?=@$_SESSION['username']?></div>
             <div id="band-info">Bands: <?=$result['band']?></div>
             <div id="bio-info">
                 <?=$result['bio']?>
             </div>
+            <?php } else { ?>
+            <div id="name-info"><?=@$_SESSION['username']?></div>
+            <div id="band-info">Bands: [Not yet Assigned]</div>
+            <div id="bio-info">
+                [Not yet Assigned]
+            </div>
+            <?php } ?>
         </div>
         
         <div id="ad-1">
@@ -65,7 +78,12 @@ require('fb_time_ago.php');
                 <?php 
                     }
                 }
-            ?>
+                else { ?>
+                <div class="video-thumbnail">
+                        <iframe class="video-youtube" src="#" title="No Registered" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        <div class="video-title">No Registered</div>
+                    </div>
+            <?php } ?>
         </div>
         
         <div id="questions" class="tab-content">
@@ -105,8 +123,19 @@ require('fb_time_ago.php');
                     
                     }
                 }
+                else { ?>
+                <div class="message user-message">
+                    <p>Start a Conversation...</p>            
+                <!-- <div>
+                                <div class="user-name">XDummyX <span class="timestamp">Yesterday</span></div>
+                                <div class="message-bubble">This is a Dummy Text...</div>
+                            </div>
+                            <div class="profile-picture-circle">
+                                <img src="gfx/q_user.png" alt="User Profile">
+                            </div> -->
+                        </div>
+            <?php } ?>
 
-                ?>
                 
             </div>
         </div>
@@ -208,5 +237,6 @@ require('fb_time_ago.php');
             }
         });
     </script>
+    <script src="script.js"></script>
 </body>
 </html>
